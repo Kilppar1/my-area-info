@@ -14,6 +14,7 @@ export default function Home() {
           priority
         />
         <div className={styles.intro}>
+          <h1>Imagine this is My Area Info!</h1>
           <h1>
             To get started, edit the{" "}
             <code className={styles.code}>page.tsx</code> file.
