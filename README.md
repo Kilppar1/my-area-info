@@ -1,3 +1,22 @@
+OHJEET PROJEKTIN ALUSTAMISEEN OMALLE KONEELLE:
+
+1. Tarkista, että homebrew asennettuna (mac). Jos ei katso netistä asennusohjeet terminaaliin (Google: homebrew)
+2. Asenna node (brew install node)
+3. Yhdistä koneen SSH-avain githubiin (jos ei vielä ole). Netistä tai chatilta löytyy varmaan hyvät ohjeet.
+4. git clone git@github.com:Kilppar1/my-area-info.git johonkin sopivaan kansiorakenteeseen.
+5. Avaa projekti VSCodessa ja avaa sen sisällä terminaali: Aja (npm install)
+6. Nyt pitäisi toimia muokkaaminen ja koodin puskeminen. Gittiä ihan mukava käyttää vscoden käyttöliittymästä vasemmalta.
+   Nettisivun voi hostata lokaalisti (npm run dev) ja mennä osoitteeseen (http://localhost:3000)
+7. Kun puskee mainiin muutokset ilmestyy vercelin kautta (https://my-area-info.vercel.app)
+
+Bonus vscode extensioneita:
+
+1. Prettier -code formatter (tallentaessa tekee koodista siistimpää)
+2. ESLint (Antaa suosituksia javascript koodiin)
+
+Jos haluaa kerrata gittiä niin tämä on ihan hyvä sivu:
+https://learngitbranching.js.org
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
