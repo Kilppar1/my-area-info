@@ -11,6 +11,7 @@ OHJEET PROJEKTIN ALUSTAMISEEN OMALLE KONEELLE:
 7. Nyt pitäisi toimia muokkaaminen ja koodin puskeminen. Gittiä ihan mukava käyttää vscoden käyttöliittymästä vasemmalta.
    Nettisivun voi hostata lokaalisti (npm run dev) ja mennä osoitteeseen (http://localhost:3000)
 8. Kun puskee mainiin muutokset ilmestyy vercelin kautta (https://my-area-info.vercel.app)
+9. Ensimmäisellä kerralla kun yrittää git pull saattaa joutua asettamaan tämän: git config pull.rebase false
 
 Bonus vscode extensioneita:
 
