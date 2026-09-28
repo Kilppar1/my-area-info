@@ -2,12 +2,15 @@ OHJEET PROJEKTIN ALUSTAMISEEN OMALLE KONEELLE:
 
 1. Tarkista, että homebrew asennettuna (mac). Jos ei katso netistä asennusohjeet terminaaliin (Google: homebrew)
 2. Asenna node (brew install node)
-3. Yhdistä koneen SSH-avain githubiin (jos ei vielä ole). Netistä tai chatilta löytyy varmaan hyvät ohjeet.
-4. git clone git@github.com:Kilppar1/my-area-info.git johonkin sopivaan kansiorakenteeseen.
-5. Avaa projekti VSCodessa ja avaa sen sisällä terminaali: Aja (npm install)
-6. Nyt pitäisi toimia muokkaaminen ja koodin puskeminen. Gittiä ihan mukava käyttää vscoden käyttöliittymästä vasemmalta.
+3. Aseta git committien käyttämä nimi ja s-posti:
+   git config --global user.name "Your Name"
+   git config --global user.email "name@domain.example"
+4. Yhdistä koneen SSH-avain githubiin (jos ei vielä ole). Netistä tai chatilta löytyy varmaan hyvät ohjeet.
+5. git clone git@github.com:Kilppar1/my-area-info.git johonkin sopivaan kansiorakenteeseen.
+6. Avaa projekti VSCodessa ja avaa sen sisällä terminaali: Aja (npm install)
+7. Nyt pitäisi toimia muokkaaminen ja koodin puskeminen. Gittiä ihan mukava käyttää vscoden käyttöliittymästä vasemmalta.
    Nettisivun voi hostata lokaalisti (npm run dev) ja mennä osoitteeseen (http://localhost:3000)
-7. Kun puskee mainiin muutokset ilmestyy vercelin kautta (https://my-area-info.vercel.app)
+8. Kun puskee mainiin muutokset ilmestyy vercelin kautta (https://my-area-info.vercel.app)
 
 Bonus vscode extensioneita:
 
