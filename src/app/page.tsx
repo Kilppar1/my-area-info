@@ -1,27 +1,18 @@
-import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
     <main>
-      <Image
-        src="/logo.svg"
-        alt="My Area Info logo"
-        width={200}
-        height={40}
-        priority
-      />
       <div>
-        <h1>Imagine this is My Area Info!</h1>
-      </div>
-      <div>
-        <a
-          className="btn btn-primary"
-          href="https://asunnot.oikotie.fi"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <p>
+          One paragraph text about the service. Lorem ipsum dolor sit amet,
+          consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
+          labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
+          exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+        </p>
+        <Link href="/results" className="btn btn-primary">
           Explore area
-        </a>
+        </Link>
       </div>
     </main>
   );
