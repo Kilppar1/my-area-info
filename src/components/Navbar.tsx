@@ -3,9 +3,26 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useSearch } from "@/context/SearchContext";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { searchData } = useSearch();
+
+  const titleSubtitle = {
+    "/results": {
+      title: (
+        <>
+          Results near{" "}
+          <span className="navbar-address">{searchData.address}</span>
+        </>
+      ),
+      subtitle: "Explore the neighbourhood",
+    },
+  }[pathname] ?? {
+    title: "My Area Info",
+    subtitle: "Explore the neighbourhood",
+  };
 
   return (
     <header className="navbar">
@@ -13,9 +30,9 @@ export default function Navbar() {
       <Link href="/" className="navbar-section">
         <Image src="/logo.svg" alt="logo" width={48} height={48} />
         <span className="navbar-brand">
-          <span className="navbar-brand-title">My Area Info</span>
+          <span className="navbar-brand-title">{titleSubtitle.title}</span>
           <span className="navbar-brand-subtitle">
-            Explore the neighbourhood
+            {titleSubtitle.subtitle}
           </span>
         </span>
       </Link>
