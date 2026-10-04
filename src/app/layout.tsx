@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Lora, Lato } from "next/font/google";
 import Navbar from "@/components/Navbar";
+import { SearchProvider } from "@/context/SearchContext";
 import "./globals.css";
 
 const lora = Lora({
@@ -24,8 +25,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={`${lora.variable} ${lato.variable}`}>
       <body>
-        <Navbar />
-        {children}
+        <SearchProvider>
+          <Navbar /> {children}
+        </SearchProvider>
       </body>
     </html>
   );
