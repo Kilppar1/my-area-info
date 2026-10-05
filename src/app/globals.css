@@ -2,6 +2,7 @@
   --color-orange: #ff8a3d;
   --color-orange-light: #ffd6a5;
   --color-green: #6b8f71;
+  --color-green-40: #6b8f7166;
   --color-green-light: #b7c9a3;
   --color-background: #fffdf9;
 
@@ -217,4 +218,39 @@ form {
 
   border: 1px solid var(--color-green);
   border-radius: 6px;
+}
+
+.form-address-verification {
+  color: var(--color-green);
+  font-size: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+.form-address-verified {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  padding: 12px;
+
+  border: 1px solid var(--color-green-40);
+  border-radius: 6px;
+
+  color: var(--color-green);
+  background-color: var(--color-background);
+}
+
+.verification-tick {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-green);
+}
+
+.verification-tick svg {
+  height: 18px;
+  width: 18px;
 }

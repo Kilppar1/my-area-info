@@ -10,6 +10,9 @@ import {
 
 type SearchData = {
   address: string;
+  criteria: string;
+  commuteAddress: String;
+  searchRange: number;
 };
 
 type SearchContextType = {
@@ -17,7 +20,12 @@ type SearchContextType = {
   setSearchData: (data: SearchData) => void;
 };
 
-const defaultSearchData: SearchData = { address: "" };
+const defaultSearchData: SearchData = {
+  address: "",
+  criteria: "",
+  commuteAddress: "",
+  searchRange: 0,
+};
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
