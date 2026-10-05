@@ -25,15 +25,46 @@ export default function Home() {
         exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
       </p>
       <form onSubmit={handleSearch}>
-        <input
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-          placeholder="Address"
-        />
-
-        <button type="submit" className="btn btn-primary">
-          Explore area
-        </button>
+        <div className="form-field">
+          <div className="form-field-label">
+            <span className="form-number">1</span>
+            <label className="form-label">Enter your address</label>
+          </div>
+          <div className="form-field-input">
+            <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g. Maarintie 8, 02150 Espoo..."
+            />
+            <button type="button" className="btn btn-primary">
+              Verify
+            </button>
+          </div>
+        </div>
+        <div className="form-field">
+          <div className="form-field-label">
+            <span className="form-number form-number-even">2</span>
+            <label className="form-label">Add search criteria</label>
+          </div>
+          <div className="form-field-input">
+            <input
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              placeholder="e.g. Maarintie 8, 02150 Espoo..."
+            />
+            <button type="button" className="btn btn-secondary">
+              Add
+            </button>
+          </div>
+        </div>
+        <div className="form-buttons">
+          <button type="button" className="btn btn-clear">
+            Clear search
+          </button>
+          <button type="submit" className="btn btn-primary">
+            Explore area
+          </button>
+        </div>
       </form>
     </main>
   );
