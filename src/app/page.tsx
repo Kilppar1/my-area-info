@@ -10,10 +10,15 @@ export default function Home() {
   const router = useRouter();
   const { setSearchData } = useSearch();
   const [address, setAddress] = useState("");
+
   function handleSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
     setSearchData({ address });
     router.push("/results");
+  }
+
+  function handleClear() {
+    setAddress("");
   }
 
   return (
@@ -50,7 +55,7 @@ export default function Home() {
             <input
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="e.g. Maarintie 8, 02150 Espoo..."
+              placeholder="Type a name of a place or type of a place..."
             />
             <button type="button" className="btn btn-secondary">
               Add
@@ -58,7 +63,7 @@ export default function Home() {
           </div>
         </div>
         <div className="form-buttons">
-          <button type="button" className="btn btn-clear">
+          <button type="button" className="btn btn-clear" onClick={handleClear}>
             Clear search
           </button>
           <button type="submit" className="btn btn-primary">
