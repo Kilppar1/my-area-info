@@ -25,6 +25,10 @@ export default function Home() {
     router.push("/results");
   }
 
+  function handleClear() {
+    setAddress("");
+  }
+
   return (
     <main>
       <p>
@@ -114,7 +118,7 @@ export default function Home() {
           </div>
         </div>
         <div className="form-buttons">
-          <button type="button" className="btn btn-clear">
+          <button type="button" className="btn btn-clear" onClick={handleClear}>
             Clear search
           </button>
           <button type="submit" className="btn btn-primary">
