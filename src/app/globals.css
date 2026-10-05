@@ -255,6 +255,10 @@ form {
   width: 18px;
 }
 
+input:focus {
+  outline: none;
+}
+
 /*Styling the map*/
 .results-map-wrapper,
 .leaflet-container {
