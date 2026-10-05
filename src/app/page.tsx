@@ -11,9 +11,16 @@ export default function Home() {
   const { setSearchData } = useSearch();
   const [address, setAddress] = useState("");
   const [commuteAddress, setCommuteAddress] = useState("");
+  const [criteriaList, setCriteriaList] = useState<string[]>([]);
   const [criteria, setCriteria] = useState("");
   const [searchRange, SetSearchRange] = useState(0);
   const [addressVerified, setAddressVerified] = useState(false);
+
+  const handleAdd = () => {
+    if (!criteria.trim()) return;
+    setCriteriaList((prev) => [...prev, criteria.trim()]);
+    setCriteria("");
+  };
 
   const verifyAddress = () => {
     setAddressVerified(true);
@@ -21,7 +28,7 @@ export default function Home() {
 
   function handleSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSearchData({ address, commuteAddress, criteria, searchRange });
+    setSearchData({ address, commuteAddress, criteriaList, searchRange });
     router.push("/results");
   }
 
@@ -96,10 +103,17 @@ export default function Home() {
               onChange={(e) => setCriteria(e.target.value)}
               placeholder="Type a name of a place or type of a place..."
             />
-            <button type="button" className="btn btn-secondary">
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="btn btn-secondary"
+            >
               Add
             </button>
           </div>
+          {criteriaList.map((item, index) => (
+            <div key={index}>{item}</div>
+          ))}
         </div>
         <div className="form-field">
           <div className="form-field-label">
