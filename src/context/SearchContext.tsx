@@ -10,7 +10,7 @@ import {
 
 type SearchData = {
   address: string;
-  criteria: string[];
+  criteriaList: string[];
   commuteAddress: string;
   searchRange: number;
 };
