@@ -10,7 +10,7 @@ import {
 
 type SearchData = {
   address: string;
-  criteria: string;
+  criteria: string[];
   commuteAddress: string;
   searchRange: number;
 };
@@ -22,7 +22,7 @@ type SearchContextType = {
 
 const defaultSearchData: SearchData = {
   address: "",
-  criteria: "",
+  criteriaList: [],
   commuteAddress: "",
   searchRange: 0,
 };

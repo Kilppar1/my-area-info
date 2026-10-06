@@ -15,6 +15,7 @@ export default function ResultsPage() {
     <main className="results-page">
       <div className="results-list">
         <p>{searchData.address}</p>
+        <p>{searchData.criteriaList}</p>
       </div>
       <div className="results-map-wrapper">
         <ResultsMap />
