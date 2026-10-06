@@ -11,7 +11,7 @@ import {
 type SearchData = {
   address: string;
   criteria: string;
-  commuteAddress: String;
+  commuteAddress: string;
   searchRange: number;
 };
 
