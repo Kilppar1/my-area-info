@@ -1,0 +1,53 @@
+/*Button styles*/
+.btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  transition: 0.2s;
+  cursor: pointer;
+  width: fit-content;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: var(--color-orange);
+  color: var(--color-background);
+  gap: 8px;
+}
+
+.btn-primary:disabled {
+  opacity: 0.4;
+}
+
+.btn-secondary {
+  background: var(--color-green);
+  color: var(--color-background);
+}
+
+.btn-clear {
+  background: var(--color-background);
+  color: var(--color-green);
+  border-color: var(--color-green);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    background: var(--color-orange-light);
+    border-color: var(--color-orange);
+  }
+
+  .btn-secondary:hover {
+    background: var(--color-green-light);
+    border-color: var(--color-green);
+  }
+
+  .btn-clear:hover {
+    background: var(--color-green-light);
+    border-color: var(--color-green);
+  }
+}

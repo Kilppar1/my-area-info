@@ -1,170 +1,3 @@
-:root {
-  --color-orange: #ff8a3d;
-  --color-orange-light: #ffd6a5;
-  --color-green: #6b8f71;
-  --color-green-40: #6b8f7166;
-  --color-green-light: #b7c9a3;
-  --color-background: #fffdf9;
-
-  --text-primary: #000;
-  --text-primary-40: #00000066;
-  --text-secondary: #666;
-
-  --font-title: var(--font-lora), Georgia, serif;
-  --font-body: var(--font-lato), Arial, sans-serif;
-}
-
-/*Default styles*/
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  color: var(--text-primary);
-  background: var(--color-background);
-  font-family: var(--font-body);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6,
-.form-label {
-  font-family: var(--font-title);
-  color: #000;
-  font-weight: 600;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-main {
-  width: min(800px, calc(100% - 48px));
-  margin: 0 auto;
-  padding: 40px 0;
-
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-/*Button styles*/
-.btn {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 6px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
-  font-weight: 500;
-  font-size: 1rem;
-}
-
-.btn-primary {
-  background: var(--color-orange);
-  color: var(--color-background);
-  gap: 8px;
-}
-
-.btn-primary:disabled {
-  opacity: 0.4;
-}
-
-.btn-secondary {
-  background: var(--color-green);
-  color: var(--color-background);
-}
-
-.btn-clear {
-  background: var(--color-background);
-  color: var(--color-green);
-  border-color: var(--color-green);
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .btn-primary:hover {
-    background: var(--color-orange-light);
-    border-color: var(--color-orange);
-  }
-
-  .btn-secondary:hover {
-    background: var(--color-green-light);
-    border-color: var(--color-green);
-  }
-
-  .btn-clear:hover {
-    background: var(--color-green-light);
-    border-color: var(--color-green);
-  }
-}
-
-@media (max-width: 600px) {
-  main {
-    padding: 48px 24px;
-  }
-}
-
-/*Navigation bar styles*/
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 12px;
-  border-bottom: 1px solid var(--color-green-light);
-}
-
-.navbar-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.navbar-brand {
-  display: flex;
-  flex-direction: column;
-}
-
-.navbar-brand-title {
-  font-family: var(--font-title);
-  font-size: 24px;
-  line-height: 1.1;
-}
-
-.navbar-address {
-  color: var(--color-orange);
-}
-
-.navbar-brand-subtitle {
-  font-size: 14px;
-  color: var(--color-green);
-}
-
 /* Search form styling*/
 form {
   display: flex;
@@ -186,6 +19,12 @@ form {
 .form-buttons {
   display: flex;
   justify-content: space-between;
+}
+
+.form-label {
+  font-family: var(--font-title);
+  color: #000;
+  font-weight: 600;
 }
 
 .form-field-label {
@@ -367,33 +206,4 @@ input:focus {
 
 .criteria-trash {
   padding-top: 2px;
-}
-
-/*Styling the map*/
-.results-map-wrapper,
-.leaflet-container {
-  min-height: 0;
-  height: 100%;
-}
-
-.results-page {
-  flex: 1 1 auto;
-  min-height: 0;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  gap: 0;
-  display: grid;
-
-  /*NÄMÄ PITÄÄ VAIHTAA JOSSAIN VAIHEESSA!*/
-  /*grid-template-columns: 2fr 1fr; /*Kartta 1/3 ruudusta*/
-  grid-template-columns: 1fr 3fr; /*Kartta 3/4 ruudusta*/
-
-  grid-template-rows: minmax(0, 1fr);
-}
-
-.results-list {
-  min-height: 0;
-  overflow-y: auto;
-  padding: 12px;
 }

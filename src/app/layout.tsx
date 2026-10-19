@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Lora, Lato } from "next/font/google";
 import Navbar from "@/components/Navbar";
 import { SearchProvider } from "@/context/SearchContext";
-import "./globals.css";
+import "./styles/globals.css";
 
 const lora = Lora({
   variable: "--font-lora",
