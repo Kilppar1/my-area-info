@@ -82,16 +82,22 @@ export default function Home() {
   };
 
   const handleAdd = (criteria: string = criteriaInput) => {
-    if (criteriaList.length < 5) {
-      const criteriaTrimmed = criteria.trim();
-      if (criteriaTrimmed && !criteriaList.includes(criteriaTrimmed))
-        setCriteriaList((prev) => [...prev, criteriaTrimmed]);
-      else if (criteriaTrimmed) {
+    const criteriaTrimmed = criteria.trim();
+    if (criteriaTrimmed) {
+      if (
+        criteriaList.includes(criteriaTrimmed) &&
+        criteriaInput !== criteria
+      ) {
         setCriteriaList((prev) =>
           prev.filter((currentCriteria) => currentCriteria !== criteriaTrimmed),
         );
+      } else if (
+        criteriaList.length < 5 &&
+        !criteriaList.includes(criteriaTrimmed)
+      ) {
+        setCriteriaList((prev) => [...prev, criteriaTrimmed]);
+        if (criteriaInput === criteria) setCriteriaInput("");
       }
-      if (criteriaInput === criteria) setCriteriaInput("");
     }
   };
 
