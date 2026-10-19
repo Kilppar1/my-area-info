@@ -1,39 +1,126 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearch } from "@/context/SearchContext";
 import type { SubmitEvent } from "react";
+import type { Address } from "@/types";
 
 export default function Home() {
   const router = useRouter();
   const { setSearchData } = useSearch();
-  const [address, setAddress] = useState("");
-  const [commuteAddress, setCommuteAddress] = useState("");
-  const [criteriaList, setCriteriaList] = useState<string[]>([]);
-  const [criteria, setCriteria] = useState("");
-  const [searchRange, SetSearchRange] = useState(0);
-  const [addressVerified, setAddressVerified] = useState(false);
+  const [homeInput, setHomeInput] = useState("");
+  const [commuteInput, setCommuteInput] = useState("");
+  const [homeAddresses, setHomeAddresses] = useState<Address[]>([]);
+  const [commuteAddresses, setCommuteAddresses] = useState<Address[]>([]);
+  const [verifiedHomeId, setVerifiedHomeId] = useState<string | null>(null);
 
-  const handleAdd = () => {
-    if (!criteria.trim()) return;
-    setCriteriaList((prev) => [...prev, criteria.trim()]);
-    setCriteria("");
+  const [verifiedCommuteId, setVerifiedCommuteId] = useState<string | null>(
+    null,
+  );
+  const [criteriaList, setCriteriaList] = useState<string[]>([]);
+  const [criteriaInput, setCriteriaInput] = useState("");
+  const [searchRange, SetSearchRange] = useState<number | null>(null);
+
+  const suggestedSearches = [
+    "School",
+    "Restaurant",
+    "Grocery store",
+    "Park",
+    "Museum",
+    "Bus stop",
+    "Gym",
+    "Bar",
+    "Hotel",
+    "Café",
+    "Pharmacy",
+  ];
+
+  const getAdresses = (addressGiven: string, addressType: string) => {
+    if (addressType === "home") setVerifiedHomeId(null);
+    if (addressType === "commute") setVerifiedCommuteId(null);
+    // hard coded mock results
+    const addresses: Address[] = [
+      {
+        id: "a1",
+        address: addressGiven,
+        coordinates: {
+          latitude: 60.18726082373336,
+          longitude: 24.81914059805439,
+        },
+      },
+      {
+        id: "a2",
+        address: "Maarintie 8, 02150 Espoo",
+        coordinates: {
+          latitude: 60.18726082373336,
+          longitude: 24.81914059805439,
+        },
+      },
+      {
+        id: "a3",
+        address: "Konemiehentie 2, 02150 Espoo",
+        coordinates: {
+          latitude: 60.187081124375624,
+          longitude: 24.82132945387877,
+        },
+      },
+    ];
+    if (addresses.length === 1) {
+      if (addressType === "home") setVerifiedHomeId(addresses[0].id);
+      if (addressType === "commute") setVerifiedCommuteId(addresses[0].id);
+    }
+    if (addressType === "home") setHomeAddresses(addresses);
+    if (addressType === "commute") setCommuteAddresses(addresses);
   };
 
-  const verifyAddress = () => {
-    setAddressVerified(true);
+  const verifyAddress = (id: string, addressType: "home" | "commute") => {
+    if (addressType === "home") setVerifiedHomeId(id);
+    if (addressType === "commute") setVerifiedCommuteId(id);
+  };
+
+  const handleAdd = (criteria: string = criteriaInput) => {
+    if (criteriaList.length < 5) {
+      const criteriaTrimmed = criteria.trim();
+      if (criteriaTrimmed && !criteriaList.includes(criteriaTrimmed))
+        setCriteriaList((prev) => [...prev, criteriaTrimmed]);
+      else if (criteriaTrimmed) {
+        setCriteriaList((prev) =>
+          prev.filter((currentCriteria) => currentCriteria !== criteriaTrimmed),
+        );
+      }
+      if (criteriaInput === criteria) setCriteriaInput("");
+    }
   };
 
   function handleSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSearchData({ address, commuteAddress, criteriaList, searchRange });
+    setSearchData({
+      homeAddresses,
+      commuteAddresses,
+      verifiedHomeId,
+      verifiedCommuteId,
+      criteriaList,
+      searchRange,
+    });
     router.push("/results");
   }
 
   function handleClear() {
-    setAddress("");
+    // Clear inputs
+    setHomeInput("");
+    setCommuteInput("");
+    setCriteriaInput("");
+    // Clear address and criteria lists and other data given
+    setHomeAddresses([]);
+    setCommuteAddresses([]);
+    setCriteriaList([]);
+    SetSearchRange(null);
+    // Clear verified addresses
+    setVerifiedHomeId(null);
+    setVerifiedCommuteId(null);
   }
 
   return (
@@ -52,90 +139,178 @@ export default function Home() {
           </div>
           <div className="form-field-input">
             <input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
+              value={homeInput}
+              onChange={(e) => setHomeInput(e.target.value)}
               placeholder="e.g. Maarintie 8, 02150 Espoo..."
             />
             <button
               type="button"
               className="btn btn-primary"
-              onClick={verifyAddress}
+              onClick={() => getAdresses(homeInput, "home")}
             >
               Verify
             </button>
           </div>
-          {!addressVerified && (
+          {!verifiedHomeId && (
             <span className="form-address-verification">
               Verify your address to enable search criteria
             </span>
           )}
-          {addressVerified && (
-            <div className="form-address-verified">
-              <span className="verification-tick">
-                <svg
-                  width="28"
-                  height="23"
-                  viewBox="0 0 28 23"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M1.34375 14.7816C1.34375 14.7816 4.03125 14.7816 7.61458 21.0525C7.61458 21.0525 17.5741 4.62883 26.4271 1.34412"
-                    stroke="currentColor"
-                    strokeWidth="2.6875"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+          {homeAddresses.map((address) => (
+            <div className="form-address-list" key={address.id}>
+              {verifiedHomeId === address.id ? (
+                <span className="verification-tick">
+                  <Image
+                    src="/verification-tick.svg"
+                    alt="verification tick"
+                    height={18}
+                    width={18}
                   />
-                </svg>
-              </span>
-              <span>{address}</span>
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => verifyAddress(address.id, "home")}
+                  className="verification-box"
+                ></button>
+              )}
+              <span>{address.address}</span>
             </div>
-          )}
+          ))}
         </div>
-        <div className="form-field">
+        <fieldset className="form-field" disabled={!verifiedHomeId}>
           <div className="form-field-label">
             <span className="form-number form-number-even">2</span>
-            <label className="form-label">Add search criteria</label>
+            <span className="form-label">Add search criteria </span>
+            <span className="form-label-counter">
+              ({criteriaList.length}/5)
+            </span>
           </div>
           <div className="form-field-input">
             <input
-              value={criteria}
-              onChange={(e) => setCriteria(e.target.value)}
+              value={criteriaInput}
+              onChange={(e) => setCriteriaInput(e.target.value)}
               placeholder="Type a name of a place or type of a place..."
             />
             <button
               type="button"
-              onClick={handleAdd}
+              onClick={() => handleAdd()}
               className="btn btn-secondary"
             >
               Add
             </button>
           </div>
-          {criteriaList.map((item, index) => (
-            <div key={index}>{item}</div>
+          <div className="suggested-searches">
+            {suggestedSearches.map((search) => (
+              <button
+                key={search}
+                type="button"
+                onClick={() => handleAdd(search)}
+                className={
+                  !criteriaList.includes(search)
+                    ? "suggestion-box"
+                    : "suggestion-box suggestion-box-added"
+                }
+              >
+                {!criteriaList.includes(search) ? (
+                  <span>+</span>
+                ) : (
+                  <span className="verification-tick">
+                    <Image
+                      src="/verification-tick.svg"
+                      alt="verification tick"
+                      height={14}
+                      width={14}
+                    />
+                  </span>
+                )}
+                <span>{search}</span>
+              </button>
+            ))}
+          </div>
+          {criteriaList.map((criteria) => (
+            <div className="form-criteria-list" key={criteria}>
+              <span>{criteria}</span>
+              <div className="criteria-properties">
+                <div className="criteria-ratings">
+                  <span className="criteria-rating-box">
+                    <Image
+                      src="/rating-tick.svg"
+                      alt="ticked ratings"
+                      height={12}
+                      width={12}
+                    />
+                  </span>
+                  <span>Ratings</span>
+                </div>
+
+                <span className="criteria-trash">
+                  <Image
+                    src="/trash-can.svg"
+                    alt="remove criteria"
+                    height={24}
+                    width={24}
+                  />
+                </span>
+              </div>
+            </div>
           ))}
-        </div>
-        <div className="form-field">
+        </fieldset>
+        <fieldset className="form-field" disabled={!verifiedHomeId}>
           <div className="form-field-label">
             <span className="form-number form-number">3</span>
             <label className="form-label">Add overall information</label>
           </div>
           <div className="form-field-input">
             <input
-              value={commuteAddress}
-              onChange={(e) => setCommuteAddress(e.target.value)}
+              value={commuteInput}
+              onChange={(e) => setCommuteInput(e.target.value)}
               placeholder="e.g. Maarintie 8, 02150 Espoo..."
             />
-            <button type="button" className="btn btn-primary">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => getAdresses(commuteInput, "commute")}
+            >
               Verify
             </button>
           </div>
-        </div>
+          {!verifiedCommuteId && commuteAddresses.length > 0 && (
+            <span className="form-address-verification">
+              Select your commute address to include it to the search
+            </span>
+          )}
+          {commuteAddresses.map((address) => (
+            <div className="form-address-list" key={address.id}>
+              {verifiedCommuteId === address.id ? (
+                <span className="verification-tick">
+                  <Image
+                    src="/verification-tick.svg"
+                    alt="verification tick"
+                    height={18}
+                    width={18}
+                  />
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => verifyAddress(address.id, "commute")}
+                  className="verification-box"
+                ></button>
+              )}
+              <span>{address.address}</span>
+            </div>
+          ))}
+        </fieldset>
         <div className="form-buttons">
           <button type="button" className="btn btn-clear" onClick={handleClear}>
             Clear search
           </button>
-          <button type="submit" className="btn btn-primary">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={!verifiedHomeId}
+          >
             Explore area
           </button>
         </div>

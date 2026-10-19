@@ -7,12 +7,15 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import type { Address } from "@/types";
 
 type SearchData = {
-  address: string;
+  homeAddresses: Address[];
+  commuteAddresses: Address[];
+  verifiedHomeId: string | null;
+  verifiedCommuteId: string | null;
   criteriaList: string[];
-  commuteAddress: string;
-  searchRange: number;
+  searchRange: number | null;
 };
 
 type SearchContextType = {
@@ -21,10 +24,12 @@ type SearchContextType = {
 };
 
 const defaultSearchData: SearchData = {
-  address: "",
+  homeAddresses: [],
+  commuteAddresses: [],
+  verifiedHomeId: null,
+  verifiedCommuteId: null,
   criteriaList: [],
-  commuteAddress: "",
-  searchRange: 0,
+  searchRange: null,
 };
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
