@@ -7,6 +7,7 @@
   --color-background: #fffdf9;
 
   --text-primary: #000;
+  --text-primary-40: #00000066;
   --text-secondary: #666;
 
   --font-title: var(--font-lora), Georgia, serif;
@@ -90,6 +91,10 @@ main {
   gap: 8px;
 }
 
+.btn-primary:disabled {
+  opacity: 0.4;
+}
+
 .btn-secondary {
   background: var(--color-green);
   color: var(--color-background);
@@ -171,6 +176,11 @@ form {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  border: none;
+}
+
+.form-field:disabled {
+  opacity: 0.4;
 }
 
 .form-buttons {
@@ -227,7 +237,7 @@ form {
   justify-content: center;
 }
 
-.form-address-verified {
+.form-address-list {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -247,16 +257,116 @@ form {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  color: var(--color-green);
 }
 
-.verification-tick svg {
+.verification-box {
+  background: transparent;
+  box-sizing: border-box;
+  flex-shrink: 0;
   height: 18px;
   width: 18px;
+  border: 1px solid var(--color-green);
+  border-radius: 6px;
 }
 
 input:focus {
-  outline: none;
+  outline: 1px solid var(--color-green);
+}
+
+.verification-box:hover,
+.verification-box:focus-visible {
+  outline: 1px solid var(--color-green);
+  cursor: pointer;
+}
+
+.form-label-counter {
+  font-family: var(--font-body);
+  color: var(--color-green);
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.suggested-searches {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 20px;
+  row-gap: 8px;
+}
+
+.suggestion-box {
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 14px;
+  height: fit-content;
+  width: fit-content;
+  padding: 5px 20px;
+  background-color: #ffd6a5;
+  color: var(--text-primary-40);
+  border-radius: 20px;
+  border: 0;
+}
+
+.suggestion-box:hover,
+.suggestion-box:focus-visible {
+  outline: 1px solid var(--color-orange);
+  cursor: pointer;
+}
+
+.suggestion-box-added {
+  background-color: var(--color-green-40);
+  color: var(--color-green);
+}
+
+.suggestion-box-added:hover,
+.suggestion-box-added:focus-visible {
+  outline: 1px solid var(--color-green);
+  cursor: pointer;
+}
+
+.form-criteria-list {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--color-orange-light);
+  border-radius: 6px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background-color: var(--color-background);
+}
+
+.criteria-properties {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.criteria-ratings {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+  gap: 10px;
+}
+
+.criteria-rating-box {
+  border: 1px solid var(--color-green);
+  display: flex;
+  align-items: center;
+  border-radius: 4px;
+  width: 16px;
+  height: 16px;
+  padding-top: 1px;
+  padding-left: 1px;
+}
+
+.criteria-trash {
+  padding-top: 2px;
 }
 
 /*Styling the map*/

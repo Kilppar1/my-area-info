@@ -8,13 +8,16 @@ import { useSearch } from "@/context/SearchContext";
 export default function Navbar() {
   const pathname = usePathname();
   const { searchData } = useSearch();
+  const verifiedHomeAddress = searchData.homeAddresses.find(
+    ({ id }) => id === searchData.verifiedHomeId,
+  )?.address;
 
   const titleSubtitle = {
     "/results": {
       title: (
         <>
           Results near{" "}
-          <span className="navbar-address">{searchData.address}</span>
+          <span className="navbar-address">{verifiedHomeAddress}</span>
         </>
       ),
       subtitle: "Explore the neighbourhood",
