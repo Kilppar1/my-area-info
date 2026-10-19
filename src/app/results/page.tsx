@@ -10,11 +10,14 @@ const ResultsMap = dynamic(() => import("@/components/ResultsMap"), {
 
 export default function ResultsPage() {
   const { searchData } = useSearch();
+  const verifiedHomeAddress = searchData.homeAddresses.find(
+    ({ id }) => id === searchData.verifiedHomeId,
+  )?.address;
 
   return (
     <main className="results-page">
       <div className="results-list">
-        <p>{searchData.address}</p>
+        <p>{verifiedHomeAddress}</p>
         <p>{searchData.criteriaList}</p>
       </div>
       <div className="results-map-wrapper">
