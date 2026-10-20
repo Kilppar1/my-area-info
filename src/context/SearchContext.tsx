@@ -7,14 +7,14 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Address } from "@/types";
+import type { Address, Criteria } from "@/types";
 
 type SearchData = {
   homeAddresses: Address[];
   commuteAddresses: Address[];
   verifiedHomeId: string | null;
   verifiedCommuteId: string | null;
-  criteriaList: string[];
+  criteriaList: Criteria[];
   searchRange: number | null;
 };
 
