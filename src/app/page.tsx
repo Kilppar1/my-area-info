@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSearch } from "@/context/SearchContext";
 import type { SubmitEvent } from "react";
 import type { Address, Criteria } from "@/types";
+import { nominatimSearchAddresses } from "@/lib/geocoding";
 
 export default function Home() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function Home() {
   );
   const [criteriaList, setCriteriaList] = useState<Criteria[]>([]);
   const [criteriaInput, setCriteriaInput] = useState("");
-  const [searchRange, setSearchRange] = useState("");
+  const [searchRange, setSearchRange] = useState("5"); // Default search range 5 km
 
   const suggestedSearches = [
     "School",
@@ -38,36 +38,18 @@ export default function Home() {
     "Pharmacy",
   ];
 
-  const getAdresses = (addressGiven: string, addressType: string) => {
+  const getAdresses = async (addressGiven: string, addressType: string) => {
     if (addressType === "home") setVerifiedHomeId(null);
     if (addressType === "commute") setVerifiedCommuteId(null);
-    // hard coded mock results
-    const addresses: Address[] = [
-      {
-        id: "a1",
-        address: addressGiven,
-        coordinates: {
-          latitude: 60.18726082373336,
-          longitude: 24.81914059805439,
-        },
-      },
-      {
-        id: "a2",
-        address: "Maarintie 8, 02150 Espoo",
-        coordinates: {
-          latitude: 60.18726082373336,
-          longitude: 24.81914059805439,
-        },
-      },
-      {
-        id: "a3",
-        address: "Konemiehentie 2, 02150 Espoo",
-        coordinates: {
-          latitude: 60.187081124375624,
-          longitude: 24.82132945387877,
-        },
-      },
-    ];
+    if (!addressGiven.trim()) return;
+
+    let addresses: Address[] = [];
+    try {
+      addresses = await nominatimSearchAddresses(addressGiven);
+    } catch (err) {
+      console.error("Failed to find addresses:", err);
+    }
+
     if (addresses.length === 1) {
       if (addressType === "home") setVerifiedHomeId(addresses[0].id);
       if (addressType === "commute") setVerifiedCommuteId(addresses[0].id);
@@ -158,7 +140,7 @@ export default function Home() {
     setHomeAddresses([]);
     setCommuteAddresses([]);
     setCriteriaList([]);
-    setSearchRange("");
+    setSearchRange("5");
     // Clear verified addresses
     setVerifiedHomeId(null);
     setVerifiedCommuteId(null);
@@ -363,7 +345,7 @@ export default function Home() {
             </button>
           ))}
           <div className="searchrange-field">
-            <label htmlFor="search-range">Search range:</label>
+            <label htmlFor="search-range">Max. search range:</label>
             <input
               id="search-range"
               type="text"
@@ -382,7 +364,7 @@ export default function Home() {
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={!verifiedHomeId}
+            disabled={!verifiedHomeId || !Number(searchRange)} // The search needs to have an address and search range
           >
             Explore area
           </button>

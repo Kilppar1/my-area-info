@@ -21,6 +21,8 @@ type SearchData = {
 type SearchContextType = {
   searchData: SearchData;
   setSearchData: (data: SearchData) => void;
+  loading: boolean;
+  setLoading: (loading: boolean) => void;
 };
 
 const defaultSearchData: SearchData = {
@@ -36,6 +38,7 @@ const SearchContext = createContext<SearchContextType | undefined>(undefined);
 
 export function SearchProvider({ children }: { children: ReactNode }) {
   const [searchData, setSearchData] = useState<SearchData>(defaultSearchData);
+  const [loading, setLoading] = useState(false);
   // Load saved search when the app starts
   useEffect(() => {
     const savedSearch = sessionStorage.getItem("searchData");
@@ -48,7 +51,9 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     sessionStorage.setItem("searchData", JSON.stringify(searchData));
   }, [searchData]);
   return (
-    <SearchContext.Provider value={{ searchData, setSearchData }}>
+    <SearchContext.Provider
+      value={{ searchData, setSearchData, loading, setLoading }}
+    >
       {" "}
       {children}{" "}
     </SearchContext.Provider>
