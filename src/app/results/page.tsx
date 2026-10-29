@@ -106,14 +106,17 @@ export default function ResultsPage() {
               {foundPlaces.length === 0 ? (
                 <p>No results found.</p>
               ) : (
-                // List all places under criteria
-                <ul>
+                // Show each place as a card (styled in results.css)
+                <div className="place-cards">
                   {foundPlaces.map((place) => (
-                    <li key={place.id}>
-                      {place.name} ({Math.round(place.distance ?? 0)} m)
-                    </li>
+                    <div key={place.id} className="place-card">
+                      <p className="place-name">{place.name}</p>
+                      <p className="place-distance">
+                        {Math.round(place.distance ?? 0)} m
+                      </p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               )}
             </div>
           ))
