@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import type { Place, CriterionResult } from "@/types";
 import { useSearch } from "@/context/SearchContext";
 import { searchInSteps, sleep } from "@/lib/geocoding";
+import Image from "next/image";
+import FilterMenu from "@/components/FilterMenu";
 
 // The map needs to be loaded in the browser
 const ResultsMap = dynamic(() => import("@/components/ResultsMap"), {
@@ -26,6 +28,17 @@ export default function ResultsPage() {
   const { homeAddresses, verifiedHomeId, criteriaList, searchRange } =
     searchData;
 
+  // States for list expanded and hidden criteria:
+  const [listExpanded, setListExpanded] = useState(false);
+  const [hidden, setHidden] = useState<Set<string>>(new Set());
+
+  // Results for the search criteria
+  const [results, setResults] = useState<CriterionResult[]>([]);
+  const visibleResults = results.filter(
+    (result) => !hidden.has(result.criteria),
+  ); // filter away hidden ones
+  const places = visibleResults.flatMap((result) => result.places);
+
   // Find the verified home address and get the maximum search range that the user has set
   const homeAddress = homeAddresses.find(({ id }) => id === verifiedHomeId);
   const maxRadius = searchRange!;
@@ -40,9 +53,18 @@ export default function ResultsPage() {
       }
     : null;
 
-  // Results for the search criteria
-  const [results, setResults] = useState<CriterionResult[]>([]);
-  const places = results.flatMap((result) => result.places);
+  // Change the visibility of the certain criteria
+  function toggleCriterion(criteria: string) {
+    setHidden((prev) => {
+      const next = new Set(prev);
+      if (next.has(criteria)) {
+        next.delete(criteria);
+      } else {
+        next.add(criteria);
+      }
+      return next;
+    });
+  }
 
   useEffect(() => {
     // Do not search if no valid coordinates were found
@@ -93,14 +115,14 @@ export default function ResultsPage() {
   }, [homeAddress, criteriaList, maxRadius, setLoading]); // if any of these change the effect is run again
 
   return (
-    <main className="results-page">
+    <main className={`results-page ${listExpanded ? "list-expanded" : ""}`}>
       <div className="results-list">
         {/* A message is shown if someone opens the results page directly without actually doing a search */}
         {!home ? (
           <p>No search found. Create one from the search page.</p>
         ) : (
           // Results are shown with criteria groups
-          results.map(({ criteria, places: foundPlaces }) => (
+          visibleResults.map(({ criteria, places: foundPlaces }) => (
             <div key={criteria}>
               <h3>{criteria}</h3>
               {foundPlaces.length === 0 ? (
@@ -127,7 +149,35 @@ export default function ResultsPage() {
 
       <div className="results-map-wrapper">
         {/* Show the map when a valid home exists */}
-        {home && <ResultsMap home={home} places={places} />}
+        {home && (
+          <ResultsMap home={home} places={places} layout={listExpanded} />
+        )}
+        {/* The filter menu component */}
+        <FilterMenu
+          items={criteriaList.map((c, i) => ({
+            name: c.criteria,
+            color: criteriaColors[(i + 1) % criteriaColors.length],
+          }))}
+          hidden={hidden}
+          onToggle={toggleCriterion}
+        />
+        {/* The layout toggle to switch between view modes */}
+        <button
+          type="button"
+          className="icon-button layout-toggle"
+          onClick={() => setListExpanded((prev) => !prev)}
+        >
+          <Image
+            src={
+              listExpanded
+                ? "/panel-left-open-no-fill.svg"
+                : "/panel-left-open-fill.svg"
+            }
+            alt={listExpanded ? "Show wide map" : "Show wide list"}
+            width={50}
+            height={50}
+          />
+        </button>
       </div>
     </main>
   );

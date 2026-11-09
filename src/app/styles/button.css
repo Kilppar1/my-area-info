@@ -51,3 +51,20 @@
     border-color: var(--color-green);
   }
 }
+
+/* Styles for the button icons over the map */
+.icon-button {
+  display: block;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.icon-button img {
+  display: block; /* Image placement corrected */
+}
+@media (hover: hover) {
+  .icon-button:hover {
+    opacity: 0.75;
+  }
+}

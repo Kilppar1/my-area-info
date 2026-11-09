@@ -1,0 +1,61 @@
+/* Map styles */
+.results-map-wrapper {
+  position: relative;
+  min-width: 0;
+  background: #e5e5e5; /* grey background when map is not drawn */
+}
+.leaflet-container {
+  min-height: 0;
+  height: 100%;
+}
+
+/* Layout toggle */
+.layout-toggle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1000; /* Place the button over the map */
+}
+
+/* Styling the filter menu with button and list */
+.filter-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Place the menu over the map */
+  padding: 12px;
+}
+
+/* The menu background */
+.filter-menu-open {
+  background: rgba(255, 214, 165, 0.8);
+  border-bottom-right-radius: 6px;
+}
+
+.filter-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0 4px;
+}
+
+.filter-list button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  color: #000;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.criteria-filtered-off {
+  opacity: 0.4; /* Criteria that are switched off */
+}
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
