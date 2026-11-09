@@ -1,27 +1,4 @@
-/*Styling the map and the layout with the toggle*/
-.results-map-wrapper {
-  position: relative;
-  min-width: 0;
-}
-.leaflet-container {
-  min-height: 0;
-  height: 100%;
-}
-.layout-toggle {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  z-index: 1000; /*Place the button over the map*/
-  padding: 0;
-  background: none;
-  border: none;
-}
-@media (hover: hover) {
-  .layout-toggle:hover {
-    opacity: 0.75;
-  }
-}
-
+/* Layout for the results page */
 .results-page {
   flex: 1 1 auto;
   min-height: 0;

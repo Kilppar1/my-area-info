@@ -2,6 +2,7 @@
 @import "./form.css";
 @import "./navbar.css";
 @import "./results.css";
+@import "./map.css";
 
 :root {
   --color-orange: #ff8a3d;

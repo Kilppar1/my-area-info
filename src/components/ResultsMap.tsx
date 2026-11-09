@@ -10,6 +10,7 @@ import {
   Popup,
   TileLayer,
   useMap,
+  ZoomControl,
 } from "react-leaflet";
 import L, { type LatLngTuple } from "leaflet";
 
@@ -60,6 +61,7 @@ export default function ResultsMap({
       center={toLatLng(home.coordinates)}
       zoom={14}
       scrollWheelZoom={true}
+      zoomControl={false}
       placeholder={<MapPlaceholder />}
     >
       <ResizeHandler trigger={layout} />
@@ -67,12 +69,12 @@ export default function ResultsMap({
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-
+      <ZoomControl position="bottomright" />{" "}
+      {/* Move the zoom controls to lower right */}
       {/* Add home icon into the map */}
       <Marker position={toLatLng(home.coordinates)} icon={homeIcon}>
         <Popup>{home.name}</Popup>
       </Marker>
-
       {/* Colored circle marker for each result */}
       {places.map((place) => (
         <CircleMarker
