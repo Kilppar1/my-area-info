@@ -112,7 +112,9 @@ export default function ResultsPage() {
                     <div key={place.id} className="place-card">
                       <p className="place-name">{place.name}</p>
                       <p className="place-distance">
-                        {Math.round(place.distance ?? 0)} m
+                        {(place.distance ?? 0) >= 1000 // If the target is over 1000m show in km
+                          ? `${((place.distance ?? 0) / 1000).toFixed(1)} km`
+                          : `${Math.round(place.distance ?? 0)} m`}
                       </p>
                     </div>
                   ))}
