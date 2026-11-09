@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import type { Place, CriterionResult } from "@/types";
 import { useSearch } from "@/context/SearchContext";
 import { searchInSteps, sleep } from "@/lib/geocoding";
+import Image from "next/image";
 
 // The map needs to be loaded in the browser
 const ResultsMap = dynamic(() => import("@/components/ResultsMap"), {
@@ -43,6 +44,9 @@ export default function ResultsPage() {
   // Results for the search criteria
   const [results, setResults] = useState<CriterionResult[]>([]);
   const places = results.flatMap((result) => result.places);
+
+  // Toggles between wide list and wide map layout
+  const [listExpanded, setListExpanded] = useState(false);
 
   useEffect(() => {
     // Do not search if no valid coordinates were found
@@ -93,7 +97,7 @@ export default function ResultsPage() {
   }, [homeAddress, criteriaList, maxRadius, setLoading]); // if any of these change the effect is run again
 
   return (
-    <main className="results-page">
+    <main className={`results-page ${listExpanded ? "list-expanded" : ""}`}>
       <div className="results-list">
         {/* A message is shown if someone opens the results page directly without actually doing a search */}
         {!home ? (
@@ -127,7 +131,26 @@ export default function ResultsPage() {
 
       <div className="results-map-wrapper">
         {/* Show the map when a valid home exists */}
-        {home && <ResultsMap home={home} places={places} />}
+        {home && (
+          <ResultsMap home={home} places={places} layout={listExpanded} />
+        )}
+
+        <button
+          type="button"
+          className="btn btn-primary layout-toggle"
+          onClick={() => setListExpanded((prev) => !prev)}
+        >
+          <Image
+            src={
+              listExpanded
+                ? "/panel-left-open-no-fill.svg"
+                : "/panel-left-open-fill.svg"
+            }
+            alt={listExpanded ? "Show wide map" : "Show wide list"}
+            width={50}
+            height={50}
+          />
+        </button>
       </div>
     </main>
   );

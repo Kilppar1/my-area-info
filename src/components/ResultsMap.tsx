@@ -2,12 +2,14 @@
 
 import type { Coordinates, Place } from "@/types";
 import "leaflet/dist/leaflet.css";
+import { useEffect } from "react";
 import {
   MapContainer,
   CircleMarker,
   Marker,
   Popup,
   TileLayer,
+  useMap,
 } from "react-leaflet";
 import L, { type LatLngTuple } from "leaflet";
 
@@ -32,12 +34,26 @@ function MapPlaceholder() {
   );
 }
 
+// Recalculate the map size after layout changes
+function ResizeHandler({ trigger }: { trigger: boolean }) {
+  const map = useMap();
+
+  useEffect(() => {
+    const timeout = setTimeout(() => map.invalidateSize(), 320); // wait for the transition animation
+    return () => clearTimeout(timeout);
+  }, [trigger, map]);
+
+  return null;
+}
+
 export default function ResultsMap({
   home,
   places,
+  layout,
 }: {
   home: Place;
   places: Place[];
+  layout: boolean;
 }) {
   return (
     <MapContainer
@@ -46,6 +62,7 @@ export default function ResultsMap({
       scrollWheelZoom={true}
       placeholder={<MapPlaceholder />}
     >
+      <ResizeHandler trigger={layout} />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
