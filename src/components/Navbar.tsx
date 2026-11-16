@@ -4,13 +4,56 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSearch } from "@/context/SearchContext";
+import { useRef } from "react";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { searchData, loading } = useSearch();
+  const { searchData, setSearchData, loading, setImportVersion } = useSearch();
   const verifiedHomeAddress = searchData.homeAddresses.find(
     ({ id }) => id === searchData.verifiedHomeId,
   )?.address;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Create and download a JSON file with the relevant search data. As the results may change, they are not included
+  function handleExport() {
+    const { results, resultsRelevant, ...searchToExport } = searchData;
+
+    const json = JSON.stringify(searchToExport, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "my-search.json";
+    link.click();
+
+    URL.revokeObjectURL(url);
+  }
+
+  // Import a file andcheck that it is JSON
+  async function handleImport(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const importedSearch = JSON.parse(text);
+
+      setSearchData({
+        ...searchData,
+        ...importedSearch,
+        results: [],
+        resultsRelevant: false,
+      });
+      setImportVersion((prev) => prev + 1);
+    } catch (error) {
+      console.error("Failed to import search:", error);
+      alert("Invalid JSON file.");
+    }
+
+    event.target.value = "";
+  }
 
   const titleSubtitle = {
     "/results": {
@@ -58,18 +101,30 @@ export default function Navbar() {
 
         {/*Check if user is on the homepage to show import button*/}
         {pathname === "/" && (
-          <Link href="" className="btn btn-primary">
-            Import search
-            <Image src="/import.svg" alt="import" width={24} height={24} />
-          </Link>
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json,application/json"
+              style={{ display: "none" }}
+              onChange={handleImport}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="btn btn-primary"
+            >
+              Import search
+              <Image src="/import.svg" alt="import" width={24} height={24} />
+            </button>
+          </>
         )}
 
         {/*Check if user is on the homepage to show export button*/}
         {pathname === "/results" && (
-          <Link href="" className="btn btn-primary">
+          <button onClick={handleExport} className="btn btn-primary">
             Export search
             <Image src="/export.svg" alt="export" width={24} height={24} />
-          </Link>
+          </button>
         )}
       </div>
     </header>

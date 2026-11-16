@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useSearch } from "@/context/SearchContext";
 import type { SubmitEvent } from "react";
@@ -9,21 +9,92 @@ import type { Address, Criteria } from "@/types";
 import { nominatimSearchAddresses } from "@/lib/geocoding";
 
 export default function Home() {
+  // Get variable values from searchdata or use default values if needed
   const router = useRouter();
-  const { setSearchData } = useSearch();
-  const [homeInput, setHomeInput] = useState("");
-  const [commuteInput, setCommuteInput] = useState("");
-  const [homeAddresses, setHomeAddresses] = useState<Address[]>([]);
-  const [commuteAddresses, setCommuteAddresses] = useState<Address[]>([]);
-  const [verifiedHomeId, setVerifiedHomeId] = useState<string | null>(null);
-
-  const [verifiedCommuteId, setVerifiedCommuteId] = useState<string | null>(
-    null,
+  const { searchData, setSearchData, loading, importVersion } = useSearch();
+  const [formInitialized, setFormInitialized] = useState(false);
+  const hasInitializedSave = useRef(false);
+  const [homeInput, setHomeInput] = useState(searchData.homeInput ?? "");
+  const [commuteInput, setCommuteInput] = useState(
+    searchData.commuteInput ?? "",
   );
-  const [criteriaList, setCriteriaList] = useState<Criteria[]>([]);
-  const [criteriaInput, setCriteriaInput] = useState("");
-  const [searchRange, setSearchRange] = useState("5"); // Default search range 5 km
+  const [homeAddresses, setHomeAddresses] = useState<Address[]>(
+    searchData.homeAddresses ?? [],
+  );
+  const [commuteAddresses, setCommuteAddresses] = useState<Address[]>(
+    searchData.commuteAddresses ?? [],
+  );
+  const [verifiedHomeId, setVerifiedHomeId] = useState<string | null>(
+    searchData.verifiedHomeId ?? null,
+  );
+  const [verifiedCommuteId, setVerifiedCommuteId] = useState<string | null>(
+    searchData.verifiedCommuteId ?? null,
+  );
+  const [criteriaList, setCriteriaList] = useState<Criteria[]>(
+    searchData.criteriaList ?? [],
+  );
+  const [criteriaInput, setCriteriaInput] = useState(
+    searchData.criteriaInput ?? "",
+  );
+  const [searchRange, setSearchRange] = useState(
+    searchData.searchRange?.toString() ?? "5",
+  ); // Default search range 5 km
 
+  // Restore saved form values after sessionStorage has loaded
+  useEffect(() => {
+    console.log("Imported version after", importVersion);
+    console.log("Loading", loading);
+    console.log("formInitialized", formInitialized);
+    if (!loading && (!formInitialized || importVersion > 0)) {
+      console.log("Going through...");
+      setFormInitialized(true);
+      setHomeInput(searchData.homeInput ?? "");
+      setCommuteInput(searchData.commuteInput ?? "");
+      setHomeAddresses(searchData.homeAddresses ?? []);
+      setCommuteAddresses(searchData.commuteAddresses ?? []);
+      setVerifiedHomeId(searchData.verifiedHomeId ?? null);
+      setVerifiedCommuteId(searchData.verifiedCommuteId ?? null);
+      setCriteriaList(searchData.criteriaList ?? []);
+      setCriteriaInput(searchData.criteriaInput ?? "");
+      setSearchRange(searchData.searchRange?.toString() ?? "5");
+    }
+  }, [loading, formInitialized, searchData, importVersion]);
+
+  // Set values to searchData if something changes on the page
+  useEffect(() => {
+    if (!formInitialized) return;
+    if (!hasInitializedSave.current) {
+      hasInitializedSave.current = true;
+      return;
+    }
+    setSearchData({
+      ...searchData,
+      homeInput,
+      commuteInput,
+      homeAddresses,
+      commuteAddresses,
+      verifiedHomeId,
+      verifiedCommuteId,
+      criteriaList,
+      criteriaInput,
+      searchRange: searchRange.trim() === "" ? null : Number(searchRange),
+      resultsRelevant: false,
+    });
+  }, [
+    formInitialized,
+    homeInput,
+    commuteInput,
+    homeAddresses,
+    commuteAddresses,
+    verifiedHomeId,
+    verifiedCommuteId,
+    criteriaList,
+    criteriaInput,
+    searchRange,
+    setSearchData,
+  ]);
+
+  // Add a list of suggestions to searches. Directly here as there are only a few, but if several more are needed, consider a separate file.
   const suggestedSearches = [
     "School",
     "Restaurant",
@@ -38,6 +109,7 @@ export default function Home() {
     "Pharmacy",
   ];
 
+  // When addresses are searched, nullify verified address and set the list of addresses to be listed to the user. If only one is found, set that as verified
   const getAdresses = async (addressGiven: string, addressType: string) => {
     if (addressType === "home") setVerifiedHomeId(null);
     if (addressType === "commute") setVerifiedCommuteId(null);
@@ -58,11 +130,13 @@ export default function Home() {
     if (addressType === "commute") setCommuteAddresses(addresses);
   };
 
+  // Set specific address as the verified address
   const verifyAddress = (id: string, addressType: "home" | "commute") => {
     if (addressType === "home") setVerifiedHomeId(id);
     if (addressType === "commute") setVerifiedCommuteId(id);
   };
 
+  // Add a search criteria to the list of search criterias selected. Max search criterias is 5 and the same criteria cannot be added twice.
   const handleAdd = (criteria: string = criteriaInput) => {
     const criteriaTrimmed = criteria.trim();
     if (
@@ -78,18 +152,21 @@ export default function Home() {
     }
   };
 
+  // Add or remove criteria to/from the selected criterias when predefiend suggestions are clicked
   const handleSuggestionClick = (suggestion: string) => {
     if (criteriaList.some((criteria) => criteria.criteria === suggestion)) {
       removeCriteria(suggestion);
     } else handleAdd(suggestion);
   };
 
+  // Remove search criteria from the list of selected criterias
   const removeCriteria = (criteria: string) => {
     setCriteriaList((prev) =>
       prev.filter((currentCriteria) => currentCriteria.criteria !== criteria),
     );
   };
 
+  // Change the ratingsEnabled for the criteria, when the function is called
   const toggleRatings = (criteria: string) => {
     setCriteriaList((previous) =>
       previous.map((prev) =>
@@ -100,6 +177,7 @@ export default function Home() {
     );
   };
 
+  // Force the input to range to be digits. Use "." as the decimal point and automatically change "," to "."during the input. Allow only one digit after decimal point
   const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     let value = e.target.value.replace(/[^0-9.,]/g, "");
     value = value.replace(/,/g, ".");
@@ -118,19 +196,13 @@ export default function Home() {
     setSearchRange(value);
   };
 
+  // Prevent default behaviour and move to results page
   function handleSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSearchData({
-      homeAddresses,
-      commuteAddresses,
-      verifiedHomeId,
-      verifiedCommuteId,
-      criteriaList,
-      searchRange: searchRange.trim() === "" ? null : Number(searchRange),
-    });
     router.push("/results");
   }
 
+  // Clear the page
   function handleClear() {
     // Clear inputs
     setHomeInput("");
@@ -154,222 +226,232 @@ export default function Home() {
         et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
         exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
       </p>
-      <form onSubmit={handleSearch}>
-        <fieldset className="form-field">
-          <div className="form-legend-field">
-            <span className="form-number">1</span>
-            <legend className="form-legend">Enter your address</legend>
-          </div>
-          <div className="form-field-input">
-            <input
-              value={homeInput}
-              onChange={(e) => setHomeInput(e.target.value)}
-              placeholder="e.g. Maarintie 8, 02150 Espoo..."
-            />
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={() => getAdresses(homeInput, "home")}
-            >
-              Verify
-            </button>
-          </div>
-          {!verifiedHomeId && (
-            <span className="form-address-verification">
-              Verify your address to enable search criteria
-            </span>
-          )}
-          {homeAddresses.map((address) => (
-            <button
-              type="button"
-              onClick={() => verifyAddress(address.id, "home")}
-              className="form-address-list"
-              key={address.id}
-            >
-              {verifiedHomeId === address.id ? (
-                <span className="verification-tick">
-                  <Image
-                    src="/verification-tick.svg"
-                    alt="verification tick"
-                    height={18}
-                    width={18}
-                  />
-                </span>
-              ) : (
-                <span className="verification-box"></span>
-              )}
-              <span>{address.address}</span>
-            </button>
-          ))}
-        </fieldset>
-        <fieldset className="form-field" disabled={!verifiedHomeId}>
-          <div className="form-legend-field">
-            <span className="form-number form-number-even">2</span>
-            <legend className="form-legend">Add search criteria </legend>
-            <span className="form-legend-counter">
-              ({criteriaList.length}/5)
-            </span>
-          </div>
-          <div className="form-field-input">
-            <input
-              value={criteriaInput}
-              onChange={(e) => setCriteriaInput(e.target.value)}
-              placeholder="Type a name of a place or type of a place..."
-            />
-            <button
-              type="button"
-              onClick={() => handleAdd()}
-              className="btn btn-secondary"
-            >
-              Add
-            </button>
-          </div>
-          <div className="suggested-searches">
-            {suggestedSearches.map((search) => (
+      {loading ? (
+        <p>Loading form...</p>
+      ) : (
+        <form onSubmit={handleSearch}>
+          <fieldset className="form-field">
+            <div className="form-legend-field">
+              <span className="form-number">1</span>
+              <legend className="form-legend">Enter your address</legend>
+            </div>
+            <div className="form-field-input">
+              <input
+                value={homeInput}
+                onChange={(e) => setHomeInput(e.target.value)}
+                placeholder="e.g. Maarintie 8, 02150 Espoo..."
+              />
               <button
-                key={search}
                 type="button"
-                onClick={() => handleSuggestionClick(search)}
-                className={
-                  !criteriaList.some((criteria) => criteria.criteria === search)
-                    ? "suggestion-box"
-                    : "suggestion-box suggestion-box-added"
-                }
+                className="btn btn-primary"
+                onClick={() => getAdresses(homeInput, "home")}
               >
-                {!criteriaList.some(
-                  (criteria) => criteria.criteria === search,
-                ) ? (
-                  <span>+</span>
-                ) : (
+                Verify
+              </button>
+            </div>
+            {!verifiedHomeId && (
+              <span className="form-address-verification">
+                Verify your address to enable search criteria
+              </span>
+            )}
+            {homeAddresses.map((address) => (
+              <button
+                type="button"
+                onClick={() => verifyAddress(address.id, "home")}
+                className="form-address-list"
+                key={address.id}
+              >
+                {verifiedHomeId === address.id ? (
                   <span className="verification-tick">
                     <Image
                       src="/verification-tick.svg"
                       alt="verification tick"
-                      height={14}
-                      width={14}
+                      height={18}
+                      width={18}
                     />
                   </span>
+                ) : (
+                  <span className="verification-box"></span>
                 )}
-                <span>{search}</span>
+                <span>{address.address}</span>
               </button>
             ))}
-          </div>
-          {criteriaList.map((criteria) => (
-            <div className="form-criteria-list" key={criteria.criteria}>
-              <span>{criteria.criteria}</span>
-              <div className="criteria-properties">
-                <button
-                  type="button"
-                  onClick={() => toggleRatings(criteria.criteria)}
-                  aria-label="Toggle ratings for criteria"
-                  className="criteria-ratings"
-                >
-                  <span className="criteria-rating-box">
-                    {criteria.ratingsEnabled && (
-                      <Image
-                        src="/rating-tick.svg"
-                        alt="ticked ratings"
-                        height={12}
-                        width={12}
-                      />
-                    )}
-                  </span>
-                  <span>Ratings</span>
-                </button>
-
-                <button
-                  type="button"
-                  className="criteria-trash"
-                  onClick={() => removeCriteria(criteria.criteria)}
-                  aria-label="Remove criteria"
-                >
-                  <Image
-                    src="/trash-can.svg"
-                    alt="remove criteria"
-                    height={24}
-                    width={24}
-                  />
-                </button>
-              </div>
+          </fieldset>
+          <fieldset className="form-field" disabled={!verifiedHomeId}>
+            <div className="form-legend-field">
+              <span className="form-number form-number-even">2</span>
+              <legend className="form-legend">Add search criteria </legend>
+              <span className="form-legend-counter">
+                ({criteriaList.length}/5)
+              </span>
             </div>
-          ))}
-        </fieldset>
-        <fieldset className="form-field" disabled={!verifiedHomeId}>
-          <div className="form-legend-field">
-            <span className="form-number form-number">3</span>
-            <legend className="form-legend">Add overall information</legend>
-          </div>
-          <p>
-            Type an optional address to calculate commuting time to work or
-            similar
-          </p>
-          <div className="form-field-input">
-            <input
-              value={commuteInput}
-              onChange={(e) => setCommuteInput(e.target.value)}
-              placeholder="e.g. Maarintie 8, 02150 Espoo..."
-            />
+            <div className="form-field-input">
+              <input
+                value={criteriaInput}
+                onChange={(e) => setCriteriaInput(e.target.value)}
+                placeholder="Type a name of a place or type of a place..."
+              />
+              <button
+                type="button"
+                onClick={() => handleAdd()}
+                className="btn btn-secondary"
+              >
+                Add
+              </button>
+            </div>
+            <div className="suggested-searches">
+              {suggestedSearches.map((search) => (
+                <button
+                  key={search}
+                  type="button"
+                  onClick={() => handleSuggestionClick(search)}
+                  className={
+                    !criteriaList.some(
+                      (criteria) => criteria.criteria === search,
+                    )
+                      ? "suggestion-box"
+                      : "suggestion-box suggestion-box-added"
+                  }
+                >
+                  {!criteriaList.some(
+                    (criteria) => criteria.criteria === search,
+                  ) ? (
+                    <span>+</span>
+                  ) : (
+                    <span className="verification-tick">
+                      <Image
+                        src="/verification-tick.svg"
+                        alt="verification tick"
+                        height={14}
+                        width={14}
+                      />
+                    </span>
+                  )}
+                  <span>{search}</span>
+                </button>
+              ))}
+            </div>
+            {criteriaList.map((criteria) => (
+              <div className="form-criteria-list" key={criteria.criteria}>
+                <span>{criteria.criteria}</span>
+                <div className="criteria-properties">
+                  <button
+                    type="button"
+                    onClick={() => toggleRatings(criteria.criteria)}
+                    aria-label="Toggle ratings for criteria"
+                    className="criteria-ratings"
+                  >
+                    <span className="criteria-rating-box">
+                      {criteria.ratingsEnabled && (
+                        <Image
+                          src="/rating-tick.svg"
+                          alt="ticked ratings"
+                          height={12}
+                          width={12}
+                        />
+                      )}
+                    </span>
+                    <span>Ratings</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="criteria-trash"
+                    onClick={() => removeCriteria(criteria.criteria)}
+                    aria-label="Remove criteria"
+                  >
+                    <Image
+                      src="/trash-can.svg"
+                      alt="remove criteria"
+                      height={24}
+                      width={24}
+                    />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </fieldset>
+          <fieldset className="form-field" disabled={!verifiedHomeId}>
+            <div className="form-legend-field">
+              <span className="form-number form-number">3</span>
+              <legend className="form-legend">Add overall information</legend>
+            </div>
+            <p>
+              Type an optional address to calculate commuting time to work or
+              similar
+            </p>
+            <div className="form-field-input">
+              <input
+                value={commuteInput}
+                onChange={(e) => setCommuteInput(e.target.value)}
+                placeholder="e.g. Maarintie 8, 02150 Espoo..."
+              />
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => getAdresses(commuteInput, "commute")}
+              >
+                Verify
+              </button>
+            </div>
+            {!verifiedCommuteId && commuteAddresses.length > 0 && (
+              <span className="form-address-verification">
+                Select your commute address to include it to the search
+              </span>
+            )}
+            {commuteAddresses.map((address) => (
+              <button
+                type="button"
+                onClick={() => verifyAddress(address.id, "commute")}
+                className="form-address-list"
+                key={address.id}
+              >
+                {verifiedCommuteId === address.id ? (
+                  <span className="verification-tick">
+                    <Image
+                      src="/verification-tick.svg"
+                      alt="verification tick"
+                      height={18}
+                      width={18}
+                    />
+                  </span>
+                ) : (
+                  <span className="verification-box"></span>
+                )}
+                <span>{address.address}</span>
+              </button>
+            ))}
+            <div className="searchrange-field">
+              <label htmlFor="search-range">Max. search range:</label>
+              <input
+                id="search-range"
+                type="text"
+                inputMode="decimal"
+                value={searchRange}
+                onChange={handleRangeChange}
+                className="searchrange-box"
+              ></input>
+              <span>km</span>
+            </div>
+          </fieldset>
+          <div className="form-buttons">
             <button
               type="button"
+              className="btn btn-clear"
+              onClick={handleClear}
+            >
+              Clear search
+            </button>
+            <button
+              type="submit"
               className="btn btn-primary"
-              onClick={() => getAdresses(commuteInput, "commute")}
+              disabled={!verifiedHomeId || !Number(searchRange)} // The search needs to have an address and search range
             >
-              Verify
+              Explore area
             </button>
           </div>
-          {!verifiedCommuteId && commuteAddresses.length > 0 && (
-            <span className="form-address-verification">
-              Select your commute address to include it to the search
-            </span>
-          )}
-          {commuteAddresses.map((address) => (
-            <button
-              type="button"
-              onClick={() => verifyAddress(address.id, "commute")}
-              className="form-address-list"
-              key={address.id}
-            >
-              {verifiedCommuteId === address.id ? (
-                <span className="verification-tick">
-                  <Image
-                    src="/verification-tick.svg"
-                    alt="verification tick"
-                    height={18}
-                    width={18}
-                  />
-                </span>
-              ) : (
-                <span className="verification-box"></span>
-              )}
-              <span>{address.address}</span>
-            </button>
-          ))}
-          <div className="searchrange-field">
-            <label htmlFor="search-range">Max. search range:</label>
-            <input
-              id="search-range"
-              type="text"
-              inputMode="decimal"
-              value={searchRange}
-              onChange={handleRangeChange}
-              className="searchrange-box"
-            ></input>
-            <span>km</span>
-          </div>
-        </fieldset>
-        <div className="form-buttons">
-          <button type="button" className="btn btn-clear" onClick={handleClear}>
-            Clear search
-          </button>
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={!verifiedHomeId || !Number(searchRange)} // The search needs to have an address and search range
-          >
-            Explore area
-          </button>
-        </div>
-      </form>
+        </form>
+      )}
     </main>
   );
 }

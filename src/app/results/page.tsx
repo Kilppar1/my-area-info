@@ -24,13 +24,22 @@ const criteriaColors = [
 ];
 
 export default function ResultsPage() {
-  const { searchData, setLoading } = useSearch();
-  const { homeAddresses, verifiedHomeId, criteriaList, searchRange } =
-    searchData;
+  const { searchData, setSearchData } = useSearch();
+  const {
+    homeAddresses,
+    verifiedHomeId,
+    criteriaList,
+    searchRange,
+    results: savedResults,
+    resultsRelevant,
+  } = searchData;
 
   // States for list expanded and hidden criteria:
   const [listExpanded, setListExpanded] = useState(false);
   const [hidden, setHidden] = useState<Set<string>>(new Set());
+
+  // State for loading
+  const [loading, setLoading] = useState(false);
 
   // Results for the search criteria
   const [results, setResults] = useState<CriterionResult[]>([]);
@@ -67,6 +76,13 @@ export default function ResultsPage() {
   }
 
   useEffect(() => {
+    // Reuse saved results if they are still relevant
+    if (resultsRelevant) {
+      setResults(savedResults);
+      setLoading(false);
+      return;
+    }
+
     // Do not search if no valid coordinates were found
     if (!homeAddress?.coordinates) return;
     const coordinates = homeAddress.coordinates;
@@ -101,8 +117,14 @@ export default function ResultsPage() {
         // We must wait between API calls because Nominatim allows 1 request per second
         await sleep(1100);
       }
-
-      setLoading(false); // Hide the loading indicator when search is done
+      if (!cancelled) {
+        setSearchData({
+          ...searchData,
+          results: all,
+          resultsRelevant: true,
+        });
+        setLoading(false); // Hide the loading indicator when search is done
+      }
     }
 
     loadPlaces(); // start search
@@ -112,7 +134,14 @@ export default function ResultsPage() {
       cancelled = true; // old search is terminated
       setLoading(false);
     };
-  }, [homeAddress, criteriaList, maxRadius, setLoading]); // if any of these change the effect is run again
+  }, [
+    homeAddress,
+    criteriaList,
+    maxRadius,
+    resultsRelevant,
+    savedResults,
+    setSearchData,
+  ]); // if any of these change the effect is run again
 
   return (
     <main className={`results-page ${listExpanded ? "list-expanded" : ""}`}>
