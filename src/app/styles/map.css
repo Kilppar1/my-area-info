@@ -59,3 +59,9 @@
   border-radius: 50%;
   flex-shrink: 0;
 }
+
+@media (hover: hover) and (pointer: fine) {
+  .filter-list button:hover {
+    opacity: 0.7;
+  }
+}
