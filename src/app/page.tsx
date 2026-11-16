@@ -109,8 +109,18 @@ export default function Home() {
     "Pharmacy",
   ];
 
+  // State for errors with fidning the address
+  const [addressError, setAddressError] = useState<{
+    type: "home" | "commute";
+    message: string;
+  } | null>(null);
+
   // When addresses are searched, nullify verified address and set the list of addresses to be listed to the user. If only one is found, set that as verified
-  const getAdresses = async (addressGiven: string, addressType: string) => {
+  const getAdresses = async (
+    addressGiven: string,
+    addressType: "home" | "commute",
+  ) => {
+    setAddressError(null);
     if (addressType === "home") setVerifiedHomeId(null);
     if (addressType === "commute") setVerifiedCommuteId(null);
     if (!addressGiven.trim()) return;
@@ -118,8 +128,15 @@ export default function Home() {
     let addresses: Address[] = [];
     try {
       addresses = await nominatimSearchAddresses(addressGiven);
+      if (addresses.length === 0) {
+        setAddressError({ type: addressType, message: "No addresses found." });
+      }
     } catch (err) {
       console.error("Failed to find addresses:", err);
+      setAddressError({
+        type: addressType,
+        message: "Address search failed. Please try again.",
+      });
     }
 
     if (addresses.length === 1) {
@@ -218,6 +235,17 @@ export default function Home() {
     setVerifiedCommuteId(null);
   }
 
+  // Enter can be used in the inputs
+  const handleEnter = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    action: () => void,
+  ) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      action();
+    }
+  };
+
   return (
     <main>
       <p>
@@ -239,6 +267,9 @@ export default function Home() {
               <input
                 value={homeInput}
                 onChange={(e) => setHomeInput(e.target.value)}
+                onKeyDown={(e) =>
+                  handleEnter(e, () => getAdresses(homeInput, "home"))
+                }
                 placeholder="e.g. Maarintie 8, 02150 Espoo..."
               />
               <button
@@ -249,10 +280,14 @@ export default function Home() {
                 Verify
               </button>
             </div>
-            {!verifiedHomeId && (
-              <span className="form-address-verification">
-                Verify your address to enable search criteria
-              </span>
+            {addressError?.type === "home" ? (
+              <span className="form-address-error">{addressError.message}</span>
+            ) : (
+              !verifiedHomeId && (
+                <span className="form-address-verification">
+                  Verify your address to enable search criteria
+                </span>
+              )
             )}
             {homeAddresses.map((address) => (
               <button
@@ -289,6 +324,7 @@ export default function Home() {
               <input
                 value={criteriaInput}
                 onChange={(e) => setCriteriaInput(e.target.value)}
+                onKeyDown={(e) => handleEnter(e, handleAdd)}
                 placeholder="Type a name of a place or type of a place..."
               />
               <button
@@ -384,6 +420,9 @@ export default function Home() {
               <input
                 value={commuteInput}
                 onChange={(e) => setCommuteInput(e.target.value)}
+                onKeyDown={(e) =>
+                  handleEnter(e, () => getAdresses(commuteInput, "commute"))
+                }
                 placeholder="e.g. Maarintie 8, 02150 Espoo..."
               />
               <button
@@ -394,10 +433,15 @@ export default function Home() {
                 Verify
               </button>
             </div>
-            {!verifiedCommuteId && commuteAddresses.length > 0 && (
-              <span className="form-address-verification">
-                Select your commute address to include it to the search
-              </span>
+            {addressError?.type === "commute" ? (
+              <span className="form-address-error">{addressError.message}</span>
+            ) : (
+              !verifiedCommuteId &&
+              commuteAddresses.length > 0 && (
+                <span className="form-address-verification">
+                  Select your commute address to include it to the search
+                </span>
+              )
             )}
             {commuteAddresses.map((address) => (
               <button
