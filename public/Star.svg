@@ -1,0 +1,10 @@
+<svg width="34" height="32" viewBox="0 0 34 32" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<use xlink:href="#stroke0_836_581" fill="#FFFDF9"/>
+<mask id="stroke1_836_581" fill="white">
+<use xlink:href="#stroke0_836_581"/>
+</mask>
+<path d="M16.6436 0L20.5725 12.0922L33.287 12.0922L23.0008 19.5656L26.9298 31.6578L16.6436 24.1844L6.35731 31.6578L10.2863 19.5656L6.48499e-05 12.0922L12.7146 12.0922L16.6436 0Z" stroke-width="2" stroke="#6B8F71" mask="url(#stroke1_836_581)"/>
+<defs>
+<path id="stroke0_836_581" d="M16.6436 0L20.5725 12.0922L33.287 12.0922L23.0008 19.5656L26.9298 31.6578L16.6436 24.1844L6.35731 31.6578L10.2863 19.5656L6.48499e-05 12.0922L12.7146 12.0922L16.6436 0Z"/>
+</defs>
+</svg>

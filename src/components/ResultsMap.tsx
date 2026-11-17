@@ -22,6 +22,13 @@ const homeIcon = L.icon({
   popupAnchor: [0, -16],
 });
 
+const officeIcon = L.icon({
+  iconUrl: "/office.svg",
+  iconSize: [32, 32],
+  iconAnchor: [16, 16],
+  popupAnchor: [0, -16],
+});
+
 // Convert coordinates to [lat, lon] for Leaflet
 const toLatLng = (c: Coordinates): LatLngTuple => [c.latitude, c.longitude];
 
@@ -49,10 +56,12 @@ function ResizeHandler({ trigger }: { trigger: boolean }) {
 
 export default function ResultsMap({
   home,
+  commute,
   places,
   layout,
 }: {
-  home: Place;
+  home: Pick<Place, "coordinates" | "name">;
+  commute: Pick<Place, "coordinates" | "name"> | null;
   places: Place[];
   layout: boolean;
 }) {
@@ -75,6 +84,11 @@ export default function ResultsMap({
       <Marker position={toLatLng(home.coordinates)} icon={homeIcon}>
         <Popup>{home.name}</Popup>
       </Marker>
+      {commute && (
+        <Marker position={toLatLng(commute.coordinates)} icon={officeIcon}>
+          <Popup>{commute.name}</Popup>
+        </Marker>
+      )}
       {/* Colored circle marker for each result */}
       {places.map((place) => (
         <CircleMarker

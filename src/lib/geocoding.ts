@@ -1,28 +1,11 @@
 import type { Address, Coordinates, NominatimResult, Place } from "@/types";
-
-// Different radiuses for Nominatim before max range
-const searchSteps = [1, 2.5, 5, 10];
-
-// Alternative search terms for each criterion (max 2 because searches are slow)
-const searchAliases: Record<string, string[]> = {
-  school: ["school", "university"],
-  restaurant: ["restaurant", "fast food"],
-  "grocery store": ["supermarket", "convenience store"],
-  park: ["park", "playground"],
-  museum: ["museum", "art gallery"],
-  "bus stop": ["bus stop", "tram stop"],
-  gym: ["fitness centre", "sports centre"],
-  bar: ["bar", "pub"],
-  hotel: ["hotel", "hostel"],
-  café: ["cafe", "coffee shop"],
-  pharmacy: ["pharmacy", "chemist"],
-};
+import { searchAliases, searchSteps } from "@/lib/constants";
 
 // Pause between API calls
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 // Calculate the distance in meters between two coordinates with Haversine function (accounts Earth's curvature)
-function distanceMeters(a: Coordinates, b: Coordinates): number {
+export function distanceMeters(a: Coordinates, b: Coordinates): number {
   const R = 6371000;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const dLat = toRad(b.latitude - a.latitude);
@@ -169,4 +152,31 @@ async function nominatimSearchCriteria(
     .filter((place) => (place.distance ?? 0) <= radiusKm * 1000)
     .sort((a, b) => (a.distance ?? 0) - (b.distance ?? 0))
     .slice(0, 3);
+}
+
+// Format distances so that if the target is over 1000m show in km
+export function formatDistance(meters: number): string {
+  return meters >= 1000
+    ? `${(meters / 1000).toFixed(1)} km`
+    : `${Math.round(meters)} m`;
+}
+
+// Calculate the travel times for commute address
+export async function routeMinutes(
+  mode: "car" | "bike" | "foot",
+  a: Coordinates,
+  b: Coordinates,
+) {
+  const url = `https://routing.openstreetmap.de/routed-${mode}/route/v1/driving/${a.longitude},${a.latitude};${b.longitude},${b.latitude}?overview=false`;
+  const data = await (await fetch(url)).json();
+  return Math.round(data.routes[0].duration / 60);
+}
+
+export async function commuteMinutes(home: Coordinates, commute: Coordinates) {
+  const car = await routeMinutes("car", home, commute);
+  await sleep(1100);
+  const bike = await routeMinutes("bike", home, commute);
+  await sleep(1100);
+  const walk = await routeMinutes("foot", home, commute);
+  return { car, bike, walk };
 }

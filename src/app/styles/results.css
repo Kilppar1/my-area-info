@@ -26,6 +26,26 @@
   padding: 12px;
 }
 
+/* Move the dot to the right side */
+.results-list h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* The link for the Google Maps route */
+.route-link {
+  color: #1a0dab;
+  text-decoration: underline;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .route-link:hover {
+    color: #0b0080;
+    text-decoration: none;
+  }
+}
+
 /* Search result cards (one card per place) */
 .place-cards {
   display: grid;
@@ -42,6 +62,10 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.commute-card {
+  max-width: 360px;
 }
 
 .place-name {
