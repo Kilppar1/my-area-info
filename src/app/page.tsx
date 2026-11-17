@@ -7,6 +7,7 @@ import { useSearch } from "@/context/SearchContext";
 import type { SubmitEvent } from "react";
 import type { Address, Criteria } from "@/types";
 import { nominatimSearchAddresses } from "@/lib/geocoding";
+import { suggestedSearches } from "@/lib/constants";
 
 export default function Home() {
   // Get variable values from searchdata or use default values if needed
@@ -93,21 +94,6 @@ export default function Home() {
     searchRange,
     setSearchData,
   ]);
-
-  // Add a list of suggestions to searches. Directly here as there are only a few, but if several more are needed, consider a separate file.
-  const suggestedSearches = [
-    "School",
-    "Restaurant",
-    "Grocery store",
-    "Park",
-    "Museum",
-    "Bus stop",
-    "Gym",
-    "Bar",
-    "Hotel",
-    "Café",
-    "Pharmacy",
-  ];
 
   // State for errors with fidning the address
   const [addressError, setAddressError] = useState<{

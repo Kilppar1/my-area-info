@@ -6,3 +6,9 @@ export type Criteria = {
 };
 
 export type CriterionResult = { criteria: string; places: Place[] };
+
+export type CommuteTimes = {
+  car: number;
+  bike: number;
+  walk: number;
+};

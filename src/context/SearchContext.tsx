@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Address, Criteria, CriterionResult } from "@/types";
+import type { Address, CommuteTimes, Criteria, CriterionResult } from "@/types";
 
 type SearchData = {
   homeInput: string;
@@ -20,6 +20,7 @@ type SearchData = {
   criteriaList: Criteria[];
   searchRange: number | null;
   results: CriterionResult[];
+  commuteTimes: CommuteTimes | null;
   resultsRelevant: boolean;
 };
 
@@ -42,6 +43,7 @@ const defaultSearchData: SearchData = {
   criteriaList: [],
   searchRange: null,
   results: [],
+  commuteTimes: null,
   resultsRelevant: false,
 };
 
