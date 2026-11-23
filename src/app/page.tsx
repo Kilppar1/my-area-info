@@ -15,6 +15,7 @@ export default function Home() {
   const { searchData, setSearchData, loading, importVersion } = useSearch();
   const [formInitialized, setFormInitialized] = useState(false);
   const hasInitializedSave = useRef(false);
+  const hasSearchChanged = useRef(false);
   const [homeInput, setHomeInput] = useState(searchData.homeInput ?? "");
   const [commuteInput, setCommuteInput] = useState(
     searchData.commuteInput ?? "",
@@ -106,6 +107,7 @@ export default function Home() {
     addressGiven: string,
     addressType: "home" | "commute",
   ) => {
+    hasSearchChanged.current = true;
     setAddressError(null);
     if (addressType === "home") setVerifiedHomeId(null);
     if (addressType === "commute") setVerifiedCommuteId(null);
@@ -135,6 +137,7 @@ export default function Home() {
 
   // Set specific address as the verified address
   const verifyAddress = (id: string, addressType: "home" | "commute") => {
+    hasSearchChanged.current = true;
     if (addressType === "home") setVerifiedHomeId(id);
     if (addressType === "commute") setVerifiedCommuteId(id);
   };
@@ -147,6 +150,7 @@ export default function Home() {
       criteriaList.length < 5 &&
       !criteriaList.some((criteria) => criteria.criteria === criteriaTrimmed)
     ) {
+      hasSearchChanged.current = true;
       setCriteriaList((prev) => [
         ...prev,
         { criteria: criteriaTrimmed, ratingsEnabled: false },
@@ -164,6 +168,7 @@ export default function Home() {
 
   // Remove search criteria from the list of selected criterias
   const removeCriteria = (criteria: string) => {
+    hasSearchChanged.current = true;
     setCriteriaList((prev) =>
       prev.filter((currentCriteria) => currentCriteria.criteria !== criteria),
     );
@@ -171,6 +176,7 @@ export default function Home() {
 
   // Change the ratingsEnabled for the criteria, when the function is called
   const toggleRatings = (criteria: string) => {
+    hasSearchChanged.current = true;
     setCriteriaList((previous) =>
       previous.map((prev) =>
         prev.criteria === criteria
@@ -202,11 +208,20 @@ export default function Home() {
   // Prevent default behaviour and move to results page
   function handleSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (hasSearchChanged.current) {
+      setSearchData((previous) => ({
+        ...previous,
+        favorites: [],
+        hiddenResultFilters: ["Favourites"],
+      }));
+      hasSearchChanged.current = false;
+    }
     router.push("/results");
   }
 
   // Clear the page
   function handleClear() {
+    hasSearchChanged.current = true;
     // Clear inputs
     setHomeInput("");
     setCommuteInput("");
@@ -243,7 +258,12 @@ export default function Home() {
       {loading ? (
         <p>Loading form...</p>
       ) : (
-        <form onSubmit={handleSearch}>
+        <form
+          onSubmit={handleSearch}
+          onChange={() => {
+            hasSearchChanged.current = true;
+          }}
+        >
           <fieldset className="form-field">
             <div className="form-legend-field">
               <span className="form-number">1</span>

@@ -58,6 +58,9 @@ export default function FilterMenu({
                 )}
                 {name}
               </button>
+              {isFavorites && (
+                <div className="filter-section-spacer" aria-hidden="true" />
+              )}
             </li>
           ))}
         </ul>

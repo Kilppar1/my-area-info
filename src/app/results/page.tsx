@@ -32,13 +32,12 @@ export default function ResultsPage() {
     favorites,
     commuteTimes: savedCommuteTimes,
     resultsRelevant,
+    hiddenResultFilters,
+    resultsListExpanded: listExpanded,
   } = searchData;
 
   // States for list expanded and hidden criteria:
-  const [listExpanded, setListExpanded] = useState(false);
-  const [hidden, setHidden] = useState<Set<string>>(
-    () => new Set(["Favourites"]),
-  );
+  const hidden = new Set(hiddenResultFilters);
   const favoritesOnly = !hidden.has("Favourites");
 
   // State for loading
@@ -87,14 +86,14 @@ export default function ResultsPage() {
 
   // Change the visibility of the certain criteria
   function toggleCriterion(criteria: string) {
-    setHidden((prev) => {
-      const next = new Set(prev);
+    setSearchData((previous) => {
+      const next = new Set(previous.hiddenResultFilters);
       if (next.has(criteria)) {
         next.delete(criteria);
       } else {
         next.add(criteria);
       }
-      return next;
+      return { ...previous, hiddenResultFilters: [...next] };
     });
   }
 
@@ -360,7 +359,12 @@ export default function ResultsPage() {
         <button
           type="button"
           className="icon-button layout-toggle"
-          onClick={() => setListExpanded((prev) => !prev)}
+          onClick={() =>
+            setSearchData((previous) => ({
+              ...previous,
+              resultsListExpanded: !previous.resultsListExpanded,
+            }))
+          }
         >
           <Image
             src={

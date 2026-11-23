@@ -50,6 +50,10 @@
   cursor: pointer;
 }
 
+.filter-section-spacer {
+  height: 12px;
+}
+
 .criteria-filtered-off {
   opacity: 0.4; /* Criteria that are switched off */
 }
