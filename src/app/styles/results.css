@@ -75,6 +75,24 @@
   overflow-wrap: anywhere;
 }
 
+.place-heading {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.favorite-button {
+  flex: 0 0 auto;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.favorite-button img {
+  display: block;
+}
+
 .place-distance {
   margin: 0;
   font-family: var(--font-title);

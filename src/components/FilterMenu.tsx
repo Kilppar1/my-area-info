@@ -3,8 +3,13 @@
 import { useState } from "react";
 import Image from "next/image";
 
-type FilterItem = { name: string; color: string };
+type FilterItem = {
+  name: string;
+  color?: string;
+  isFavorites?: boolean;
+};
 
+// Filter menu shows the criteria and favourites as categories that the user can switch on or off
 export default function FilterMenu({
   items,
   hidden,
@@ -34,14 +39,23 @@ export default function FilterMenu({
 
       {open && (
         <ul className="filter-list">
-          {items.map(({ name, color }) => (
+          {items.map(({ name, color, isFavorites }) => (
             <li key={name}>
               <button
                 type="button"
                 className={hidden.has(name) ? "criteria-filtered-off" : ""}
                 onClick={() => onToggle(name)}
               >
-                <span className="dot" style={{ background: color }} />
+                {isFavorites ? (
+                  <Image
+                    src={hidden.has(name) ? "/Star.svg" : "/Star-fill.svg"}
+                    alt=""
+                    width={20}
+                    height={20}
+                  />
+                ) : (
+                  <span className="dot" style={{ background: color }} />
+                )}
                 {name}
               </button>
             </li>
