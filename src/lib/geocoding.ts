@@ -4,6 +4,26 @@ import { searchAliases, searchSteps } from "@/lib/constants";
 // Pause between API calls
 export const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+let nominatimQueue: Promise<void> = Promise.resolve();
+let lastNominatimRequestAt = 0;
+
+// Nominatim requests are restricted by 1.1s cap in between due to nominatim policy
+function fetchNominatim(url: string): Promise<Response> {
+  const request = nominatimQueue.then(async () => {
+    const waitMs = Math.max(0, 1100 - (Date.now() - lastNominatimRequestAt));
+    if (waitMs > 0) await sleep(waitMs);
+
+    lastNominatimRequestAt = Date.now();
+    return fetch(url);
+  });
+
+  nominatimQueue = request.then(
+    () => undefined,
+    () => undefined,
+  );
+  return request;
+}
+
 // Calculate the distance in meters between two coordinates with Haversine function (accounts Earth's curvature)
 export function distanceMeters(a: Coordinates, b: Coordinates): number {
   const R = 6371000;
@@ -26,7 +46,7 @@ export async function nominatimSearchAddresses(
   const url =
     "https://nominatim.openstreetmap.org/search?format=json&limit=3&addressdetails=1&layer=address&q=" +
     encodeURIComponent(query);
-  const res = await fetch(url);
+  const res = await fetchNominatim(url);
   if (!res.ok) {
     throw new Error(`Nominatim ${res.status}`);
   }
@@ -77,7 +97,6 @@ export async function searchInSteps(
   for (let i = 0; i < radius.length; i++) {
     found = await nominatimSearchCriteria(criteria, color, home, radius[i]);
     if (found.length >= 3) break; // stop when 3 places are found
-    if (i < radius.length - 1) await sleep(1100); // wait before another radius search
   }
 
   return found;
@@ -115,7 +134,7 @@ async function nominatimSearchCriteria(
 
     console.log("Nominatim url:", url);
     // Send the request and read results
-    const res = await fetch(url);
+    const res = await fetchNominatim(url);
     if (!res.ok) {
       throw new Error(`Nominatim ${res.status}`);
     }
@@ -143,8 +162,6 @@ async function nominatimSearchCriteria(
         distance: distanceMeters(home, position),
       });
     }
-
-    if (w < searchWords.length - 1) await sleep(1100); // wait before seaching the next alternative
   }
 
   // Filter by radius, sort by distance and return 3 closest places

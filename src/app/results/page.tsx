@@ -7,7 +7,6 @@ import { useSearch } from "@/context/SearchContext";
 import {
   distanceMeters,
   searchInSteps,
-  sleep,
   commuteMinutes,
   formatDistance,
 } from "@/lib/geocoding";
@@ -189,9 +188,6 @@ export default function ResultsPage() {
         } catch (err) {
           console.error(`Failed to fetch ${criteriaList[i].criteria}:`, err);
         }
-
-        // We must wait between API calls because Nominatim allows 1 request per second
-        await sleep(1100);
       }
 
       const times = await commutePromise;
