@@ -43,6 +43,7 @@ export default function Navbar() {
       setSearchData({
         ...searchData,
         ...importedSearch,
+        favorites: importedSearch.favorites ?? [],
         results: [],
         resultsRelevant: false,
       });

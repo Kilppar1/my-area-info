@@ -7,7 +7,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { Address, CommuteTimes, Criteria, CriterionResult } from "@/types";
+import type {
+  Address,
+  CommuteTimes,
+  Criteria,
+  CriterionResult,
+  Place,
+} from "@/types";
 
 type SearchData = {
   homeInput: string;
@@ -20,13 +26,14 @@ type SearchData = {
   criteriaList: Criteria[];
   searchRange: number | null;
   results: CriterionResult[];
+  favorites: Place[];
   commuteTimes: CommuteTimes | null;
   resultsRelevant: boolean;
 };
 
 type SearchContextType = {
   searchData: SearchData;
-  setSearchData: (data: SearchData) => void;
+  setSearchData: React.Dispatch<React.SetStateAction<SearchData>>;
   loading: boolean;
   importVersion: number;
   setImportVersion: React.Dispatch<React.SetStateAction<number>>;
@@ -43,6 +50,7 @@ const defaultSearchData: SearchData = {
   criteriaList: [],
   searchRange: null,
   results: [],
+  favorites: [],
   commuteTimes: null,
   resultsRelevant: false,
 };
@@ -59,7 +67,12 @@ export function SearchProvider({ children }: { children: ReactNode }) {
     const savedSearch = sessionStorage.getItem("searchData");
     if (savedSearch) {
       try {
-        setSearchData(JSON.parse(savedSearch));
+        const parsedSearch = JSON.parse(savedSearch);
+        setSearchData({
+          ...defaultSearchData,
+          ...parsedSearch,
+          favorites: parsedSearch.favorites ?? [],
+        });
       } catch (error) {
         console.error("Failed to load saved search: ", error);
       }

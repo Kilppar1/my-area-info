@@ -7,7 +7,6 @@ import { useSearch } from "@/context/SearchContext";
 import {
   distanceMeters,
   searchInSteps,
-  sleep,
   commuteMinutes,
   formatDistance,
 } from "@/lib/geocoding";
@@ -30,23 +29,29 @@ export default function ResultsPage() {
     criteriaList,
     searchRange,
     results: savedResults,
+    favorites,
     commuteTimes: savedCommuteTimes,
     resultsRelevant,
   } = searchData;
 
   // States for list expanded and hidden criteria:
   const [listExpanded, setListExpanded] = useState(false);
-  const [hidden, setHidden] = useState<Set<string>>(new Set());
+  const [hidden, setHidden] = useState<Set<string>>(
+    () => new Set(["Favourites"]),
+  );
+  const favoritesOnly = !hidden.has("Favourites");
 
   // State for loading
   const [loading, setLoading] = useState(false);
 
   // Results for the search criteria
   const [results, setResults] = useState<CriterionResult[]>([]);
-  const visibleResults = results.filter(
-    (result) => !hidden.has(result.criteria),
-  ); // filter away hidden ones
-  const places = visibleResults.flatMap((result) => result.places);
+  const visibleResults = favoritesOnly
+    ? []
+    : results.filter((result) => !hidden.has(result.criteria)); // filter away hidden ones
+  const places = favoritesOnly
+    ? favorites
+    : visibleResults.flatMap((result) => result.places);
 
   // State for the commute times
   const [commuteTimes, setCommuteTimes] = useState<CommuteTimes | null>(null);
@@ -91,6 +96,44 @@ export default function ResultsPage() {
       }
       return next;
     });
+  }
+
+  // Favourite or unfavourite places from the results list
+  function toggleFavorite(place: (typeof favorites)[number]) {
+    setSearchData((previous) => ({
+      ...previous,
+      favorites: previous.favorites.some(({ id }) => id === place.id)
+        ? previous.favorites.filter(({ id }) => id !== place.id)
+        : [...previous.favorites, place],
+    }));
+  }
+
+  // Render result cards with favourite or unfavourite option
+  function renderPlaceCard(place: (typeof results)[number]["places"][number]) {
+    const isFavorite = favorites.some(({ id }) => id === place.id);
+
+    return (
+      <div key={place.id} className="place-card">
+        <div className="place-heading">
+          <button
+            type="button"
+            className="favorite-button"
+            aria-label={`${isFavorite ? "Remove" : "Add"} ${place.name} ${isFavorite ? "from" : "to"} favourites`}
+            aria-pressed={isFavorite}
+            onClick={() => toggleFavorite(place)}
+          >
+            <Image
+              src={isFavorite ? "/Star-fill.svg" : "/Star.svg"}
+              alt="Favourite"
+              width={24}
+              height={23}
+            />
+          </button>
+          <p className="place-name">{place.name}</p>
+        </div>
+        <p className="place-distance">{formatDistance(place.distance ?? 0)}</p>
+      </div>
+    );
   }
 
   useEffect(() => {
@@ -145,19 +188,16 @@ export default function ResultsPage() {
         } catch (err) {
           console.error(`Failed to fetch ${criteriaList[i].criteria}:`, err);
         }
-
-        // We must wait between API calls because Nominatim allows 1 request per second
-        await sleep(1100);
       }
 
       const times = await commutePromise;
       if (!cancelled) {
-        setSearchData({
-          ...searchData,
+        setSearchData((previous) => ({
+          ...previous,
           results: all,
           commuteTimes: times,
           resultsRelevant: true,
-        });
+        }));
         setLoading(false); // Hide the loading indicator when search is done
       }
     }
@@ -189,6 +229,7 @@ export default function ResultsPage() {
         ) : (
           <>
             {commuteAddress &&
+              !favoritesOnly &&
               !hidden.has("Commute address") && ( // Show the commute if it exists
                 <div>
                   <h3>
@@ -245,39 +286,44 @@ export default function ResultsPage() {
                   </div>
                 </div>
               )}
-            {visibleResults.map(({ criteria, places: foundPlaces }) => (
-              <div key={criteria}>
-                <h3>
-                  {criteria}
-                  <span
-                    className="dot"
-                    style={{
-                      background:
-                        criteriaColors[
-                          criteriaList.findIndex(
-                            (c) => c.criteria === criteria,
-                          ) + 1
-                        ],
-                    }}
-                  />
-                </h3>
-                {foundPlaces.length === 0 ? (
-                  <p>No results found.</p>
+            {favoritesOnly ? (
+              <div>
+                <h3>Favourites</h3>
+                {favorites.length === 0 ? (
+                  <p>No favourites saved.</p>
                 ) : (
-                  // Show each place as a card (styled in results.css)
                   <div className="place-cards">
-                    {foundPlaces.map((place) => (
-                      <div key={place.id} className="place-card">
-                        <p className="place-name">{place.name}</p>
-                        <p className="place-distance">
-                          {formatDistance(place.distance ?? 0)}
-                        </p>
-                      </div>
-                    ))}
+                    {favorites.map(renderPlaceCard)}
                   </div>
                 )}
               </div>
-            ))}
+            ) : (
+              visibleResults.map(({ criteria, places: foundPlaces }) => (
+                <div key={criteria}>
+                  <h3>
+                    {criteria}
+                    <span
+                      className="dot"
+                      style={{
+                        background:
+                          criteriaColors[
+                            criteriaList.findIndex(
+                              (c) => c.criteria === criteria,
+                            ) + 1
+                          ],
+                      }}
+                    />
+                  </h3>
+                  {foundPlaces.length === 0 ? (
+                    <p>No results found.</p>
+                  ) : (
+                    <div className="place-cards">
+                      {foundPlaces.map(renderPlaceCard)}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
           </>
         )}
       </div>
@@ -288,7 +334,9 @@ export default function ResultsPage() {
         {home && (
           <ResultsMap
             home={home}
-            commute={hidden.has("Commute address") ? null : commute}
+            commute={
+              favoritesOnly || hidden.has("Commute address") ? null : commute
+            }
             places={places}
             layout={listExpanded}
           />
@@ -296,6 +344,7 @@ export default function ResultsPage() {
         {/* The filter menu component */}
         <FilterMenu
           items={[
+            { name: "Favourites", isFavorites: true },
             ...(commuteAddress
               ? [{ name: "Commute address", color: criteriaColors[0] }]
               : []),
