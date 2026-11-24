@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSearch } from "@/context/SearchContext";
 import { useRef } from "react";
 
+// Display navigation controls and import or export the current search
 export default function Navbar() {
   const pathname = usePathname();
   const { searchData, setSearchData, loading, setImportVersion } = useSearch();
@@ -38,7 +39,7 @@ export default function Navbar() {
     URL.revokeObjectURL(url);
   }
 
-  // Import a file andcheck that it is JSON
+  // Import a file and check that it is JSON
   async function handleImport(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 

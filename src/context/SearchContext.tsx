@@ -15,7 +15,7 @@ import type {
   Place,
 } from "@/types";
 
-type SearchData = {
+export type SearchData = {
   homeInput: string;
   commuteInput: string;
   criteriaInput: string;
@@ -76,8 +76,9 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           ...defaultSearchData,
           ...parsedSearch,
           favorites: parsedSearch.favorites ?? [],
-          hiddenResultFilters:
-            parsedSearch.hiddenResultFilters ?? ["Favourites"],
+          hiddenResultFilters: parsedSearch.hiddenResultFilters ?? [
+            "Favourites",
+          ],
           resultsListExpanded: parsedSearch.resultsListExpanded ?? false,
         });
       } catch (error) {

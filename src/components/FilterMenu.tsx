@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
+// An item shown in the filter menu
 type FilterItem = {
   name: string;
   color?: string;

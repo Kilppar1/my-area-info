@@ -5,22 +5,26 @@
 @import "./map.css";
 
 :root {
+  /* Theme colors */
   --color-orange: #ff8a3d;
   --color-orange-light: #ffd6a5;
   --color-green: #6b8f71;
   --color-green-40: #6b8f7166;
   --color-green-light: #b7c9a3;
+  --color-green-card: #edf3ea;
   --color-background: #fffdf9;
 
+  /* Text colors */
   --text-primary: #000;
   --text-primary-40: #00000066;
   --text-secondary: #666;
 
+  /* Typography */
   --font-title: var(--font-lora), Georgia, serif;
   --font-body: var(--font-lato), Arial, sans-serif;
 }
 
-/*Default styles*/
+/* Default document styles */
 html {
   height: 100%;
 }
@@ -42,17 +46,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+/* Shared heading styles */
+h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-title);
   color: #000;
   font-weight: 600;
 }
 
+/* Shared element defaults */
 * {
   box-sizing: border-box;
   padding: 0;
@@ -64,6 +65,7 @@ a {
   text-decoration: none;
 }
 
+/* Main page layout */
 main {
   width: min(800px, calc(100% - 48px));
   margin: 0 auto;

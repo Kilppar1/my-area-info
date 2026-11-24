@@ -9,6 +9,7 @@ import type { Address, Criteria } from "@/types";
 import { nominatimSearchAddresses } from "@/lib/geocoding";
 import { suggestedSearches } from "@/lib/constants";
 
+// Render and manage the search form
 export default function Home() {
   // Get variable values from searchdata or use default values if needed
   const router = useRouter();
@@ -153,7 +154,7 @@ export default function Home() {
       hasSearchChanged.current = true;
       setCriteriaList((prev) => [
         ...prev,
-        { criteria: criteriaTrimmed, ratingsEnabled: false },
+        { criteria: criteriaTrimmed, ratingsEnabled: true },
       ]);
       if (criteriaInput === criteria) setCriteriaInput("");
     }
@@ -236,7 +237,7 @@ export default function Home() {
     setVerifiedCommuteId(null);
   }
 
-  // Enter can be used in the inputs
+  // Enter can be used to submit the inputs
   const handleEnter = (
     e: React.KeyboardEvent<HTMLInputElement>,
     action: () => void,

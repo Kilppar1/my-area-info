@@ -1,4 +1,4 @@
-import { Place } from "./address";
+import type { Place } from "./address";
 
 export type Criteria = {
   criteria: string;
