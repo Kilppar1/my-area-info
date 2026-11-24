@@ -1,15 +1,15 @@
 PROJEKTIN ALUSTAMINEN OMALLE KONEELLE:
 
 1. Asenna homebrew
-2. Asenna node (brew install node)
+2. brew install node
 3. Aseta git committien käyttämä nimi ja s-posti:
    git config --global user.name "Your Name"
    git config --global user.email "name@domain.example"
 4. Yhdistä koneen SSH-avain GitHubiin (jos ei vielä ole).
 5. git clone git@github.com:Kilppar1/my-area-info.git
-6. Avaa projekti VSCodessa ja avaa sen sisällä terminaali: npm install
-7. npm run dev (http://localhost:3000)
-8. Vercel: (https://my-area-info.vercel.app)
+6. VSCode terminal: npm install
+7. npm run dev: http://localhost:3000
+8. Vercel: https://my-area-info.vercel.app
 9. Ensimmäisellä kerralla kun tekee git pull saattaa joutua asettamaan: git config pull.rebase false
 
 Käytetyt VSCode extensionit:
