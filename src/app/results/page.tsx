@@ -1,24 +1,28 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
-import type { Place, CriterionResult, CommuteTimes } from "@/types";
-import { useSearch } from "@/context/SearchContext";
 import {
-  distanceMeters,
-  searchInSteps,
-  commuteMinutes,
-  formatDistance,
-} from "@/lib/geocoding";
+  useEffect,
+  useRef,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
+import type { Place } from "@/types";
+import { useSearch } from "@/context/SearchContext";
+import { distanceMeters } from "@/lib/geocoding";
 import Image from "next/image";
 import FilterMenu from "@/components/FilterMenu";
 import { criteriaColors } from "@/lib/constants";
+import { useSearchResults } from "@/hooks/useSearchResults";
+import PlaceCard from "@/components/results/PlaceCard";
+import CommuteCategory from "@/components/results/CommuteCategory";
 
 // The map needs to be loaded in the browser
 const ResultsMap = dynamic(() => import("@/components/ResultsMap"), {
   ssr: false,
 });
 
+// Render the search results
 export default function ResultsPage() {
   const { searchData, setSearchData } = useSearch();
   const {
@@ -32,29 +36,23 @@ export default function ResultsPage() {
     favorites,
     commuteTimes: savedCommuteTimes,
     resultsRelevant,
+    hiddenResultFilters,
+    resultsListExpanded: listExpanded,
   } = searchData;
 
   // States for list expanded and hidden criteria:
-  const [listExpanded, setListExpanded] = useState(false);
-  const [hidden, setHidden] = useState<Set<string>>(
-    () => new Set(["Favourites"]),
-  );
+  const hidden = new Set(hiddenResultFilters);
   const favoritesOnly = !hidden.has("Favourites");
 
-  // State for loading
-  const [loading, setLoading] = useState(false);
-
-  // Results for the search criteria
-  const [results, setResults] = useState<CriterionResult[]>([]);
-  const visibleResults = favoritesOnly
-    ? []
-    : results.filter((result) => !hidden.has(result.criteria)); // filter away hidden ones
-  const places = favoritesOnly
-    ? favorites
-    : visibleResults.flatMap((result) => result.places);
-
-  // State for the commute times
-  const [commuteTimes, setCommuteTimes] = useState<CommuteTimes | null>(null);
+  const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
+  const [selectedCommute, setSelectedCommute] = useState(false);
+  const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
+  const [hoveredCommute, setHoveredCommute] = useState(false);
+  const placeCardRefs = useRef(new Map<string, HTMLDivElement>());
+  const commuteCategoryRef = useRef<HTMLElement | null>(null);
+  const activePlaceId =
+    hoveredPlaceId ?? (hoveredCommute ? null : selectedPlaceId);
+  const activeCommute = !hoveredPlaceId && (hoveredCommute || selectedCommute);
 
   // Find the verified home and commute addresses and get the maximum search range that the user has set
   const homeAddress = homeAddresses.find(({ id }) => id === verifiedHomeId);
@@ -62,6 +60,39 @@ export default function ResultsPage() {
     ({ id }) => id === verifiedCommuteId,
   );
   const maxRadius = searchRange!;
+  const { results, commuteTimes } = useSearchResults({
+    homeAddress,
+    commuteAddress,
+    criteriaList,
+    maxRadius,
+    resultsRelevant,
+    savedResults,
+    savedCommuteTimes,
+    setSearchData,
+  });
+
+  useEffect(() => {
+    const scrollTarget = activeCommute
+      ? commuteCategoryRef.current
+      : activePlaceId
+        ? placeCardRefs.current.get(activePlaceId)
+        : null;
+    if (!scrollTarget) return;
+
+    scrollTarget.scrollIntoView({
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ? "auto"
+        : "smooth",
+      block: "nearest",
+    });
+  }, [activePlaceId, activeCommute]);
+
+  const visibleResults = favoritesOnly
+    ? []
+    : results.filter((result) => !hidden.has(result.criteria)); // filter away hidden ones
+  const places = favoritesOnly
+    ? favorites
+    : visibleResults.flatMap((result) => result.places);
 
   // Create the home marker if the address has valid coordinates
   const home: Pick<Place, "coordinates" | "name"> | null =
@@ -80,22 +111,87 @@ export default function ResultsPage() {
           name: commuteAddress.address,
         }
       : null;
+  const visibleCommute =
+    favoritesOnly || hidden.has("Commute address") ? null : commute;
   const commuteDistance =
     home?.coordinates && commute?.coordinates
       ? distanceMeters(home.coordinates, commute.coordinates)
       : null;
+  const transitDirectionsUrl =
+    home?.coordinates && commute?.coordinates
+      ? `https://www.google.com/maps/dir/?api=1&origin=${home.coordinates.latitude},${home.coordinates.longitude}&destination=${commute.coordinates.latitude},${commute.coordinates.longitude}&travelmode=transit&transit_mode=bus`
+      : null;
 
   // Change the visibility of the certain criteria
   function toggleCriterion(criteria: string) {
-    setHidden((prev) => {
-      const next = new Set(prev);
+    setSearchData((previous) => {
+      const next = new Set(previous.hiddenResultFilters);
       if (next.has(criteria)) {
         next.delete(criteria);
       } else {
         next.add(criteria);
       }
-      return next;
+      return { ...previous, hiddenResultFilters: [...next] };
     });
+  }
+
+  // Toggle selection of a place card or map marker
+  function toggleSelectedPlace(placeId: string) {
+    setSelectedCommute(false);
+    const nextPlaceId = selectedPlaceId === placeId ? null : placeId;
+    setSelectedPlaceId(nextPlaceId);
+    setHoveredPlaceId(null);
+    setHoveredCommute(false);
+  }
+
+  // Toggle selection of the commute marker
+  function toggleSelectedCommute() {
+    setSelectedPlaceId(null);
+    const nextSelectedCommute = !selectedCommute;
+    setSelectedCommute(nextSelectedCommute);
+    setHoveredPlaceId(null);
+    setHoveredCommute(false);
+  }
+
+  // Clear place and commute selection
+  function clearSelectedPlace() {
+    setSelectedPlaceId(null);
+    setSelectedCommute(false);
+    setHoveredPlaceId(null);
+    setHoveredCommute(false);
+  }
+
+  // Set the currently hovered place
+  function hoverPlace(placeId: string | null) {
+    setHoveredPlaceId(placeId);
+    if (placeId) setHoveredCommute(false);
+  }
+
+  // Set whether the commute marker is hovered
+  function hoverCommute(isHovered: boolean) {
+    setHoveredCommute(isHovered);
+    if (isHovered) setHoveredPlaceId(null);
+  }
+
+  // Clear selection when the results list background is clicked
+  function handleResultsListClick(event: ReactMouseEvent<HTMLDivElement>) {
+    const target = event.target;
+    if (!(target instanceof Element)) return;
+
+    if (target.closest(".commute-option")) {
+      clearSelectedPlace();
+      return;
+    }
+
+    if (
+      target.closest(
+        ".place-card, .commute-select-button, .category-header, button, a",
+      )
+    ) {
+      return;
+    }
+
+    clearSelectedPlace();
   }
 
   // Favourite or unfavourite places from the results list
@@ -108,121 +204,9 @@ export default function ResultsPage() {
     }));
   }
 
-  // Render result cards with favourite or unfavourite option
-  function renderPlaceCard(place: (typeof results)[number]["places"][number]) {
-    const isFavorite = favorites.some(({ id }) => id === place.id);
-
-    return (
-      <div key={place.id} className="place-card">
-        <div className="place-heading">
-          <button
-            type="button"
-            className="favorite-button"
-            aria-label={`${isFavorite ? "Remove" : "Add"} ${place.name} ${isFavorite ? "from" : "to"} favourites`}
-            aria-pressed={isFavorite}
-            onClick={() => toggleFavorite(place)}
-          >
-            <Image
-              src={isFavorite ? "/Star-fill.svg" : "/Star.svg"}
-              alt="Favourite"
-              width={24}
-              height={23}
-            />
-          </button>
-          <p className="place-name">{place.name}</p>
-        </div>
-        <p className="place-distance">{formatDistance(place.distance ?? 0)}</p>
-      </div>
-    );
-  }
-
-  useEffect(() => {
-    // Reuse saved results if they are still relevant
-    if (resultsRelevant) {
-      setResults(savedResults);
-      setCommuteTimes(savedCommuteTimes);
-      setLoading(false);
-      return;
-    }
-
-    // Do not search if no valid coordinates were found
-    if (!homeAddress?.coordinates) return;
-    const coordinates = homeAddress.coordinates;
-    const commuteCoordinates = commuteAddress?.coordinates;
-
-    let cancelled = false; // ability to cancel a seach
-
-    async function loadPlaces() {
-      setLoading(true); // show loading indicator for the user
-      setResults([]); // clear results
-      setCommuteTimes(null);
-
-      // Fetch the commute times at the same time (different server than Nominatim)
-      const commutePromise = commuteCoordinates
-        ? commuteMinutes(coordinates, commuteCoordinates).catch((err) => {
-            console.error("Failed to fetch commute times:", err);
-            return null;
-          })
-        : Promise.resolve(null);
-      commutePromise.then((times) => {
-        if (!cancelled) setCommuteTimes(times);
-      });
-
-      // Search each criterion separately
-      const all: CriterionResult[] = [];
-      for (let i = 0; i < criteriaList.length; i++) {
-        try {
-          // Actual search happens in geocoding
-          const found = await searchInSteps(
-            criteriaList[i].criteria,
-            criteriaColors[i + 1], // +1 because color 0 is for commute
-            coordinates,
-            maxRadius,
-          );
-
-          if (cancelled) return; // stop if search was cancelled
-
-          // Save the results for each criteria
-          all.push({ criteria: criteriaList[i].criteria, places: found });
-          setResults([...all]);
-        } catch (err) {
-          console.error(`Failed to fetch ${criteriaList[i].criteria}:`, err);
-        }
-      }
-
-      const times = await commutePromise;
-      if (!cancelled) {
-        setSearchData((previous) => ({
-          ...previous,
-          results: all,
-          commuteTimes: times,
-          resultsRelevant: true,
-        }));
-        setLoading(false); // Hide the loading indicator when search is done
-      }
-    }
-
-    loadPlaces(); // start search
-
-    // Clean up function when a new search happens
-    return () => {
-      cancelled = true; // old search is terminated
-      setLoading(false);
-    };
-  }, [
-    homeAddress,
-    commuteAddress,
-    criteriaList,
-    maxRadius,
-    resultsRelevant,
-    savedResults,
-    savedCommuteTimes,
-    setSearchData,
-  ]); // if any of these change the effect is run again
-
   return (
     <main className={`results-page ${listExpanded ? "list-expanded" : ""}`}>
-      <div className="results-list">
+      <div className="results-list" onClick={handleResultsListClick}>
         {/* A message is shown if someone opens the results page directly without actually doing a search */}
         {!home ? (
           <p>No search found. Create one from the search page.</p>
@@ -231,77 +215,52 @@ export default function ResultsPage() {
             {commuteAddress &&
               !favoritesOnly &&
               !hidden.has("Commute address") && ( // Show the commute if it exists
-                <div>
-                  <h3>
-                    Commute address
-                    <span
-                      className="dot"
-                      style={{ background: criteriaColors[0] }}
-                    />
-                  </h3>
-                  <div className="place-cards">
-                    <div className="place-card commute-card">
-                      <p className="place-name">{commuteAddress.address}</p>
-                      {commuteDistance !== null && (
-                        <p className="place-distance">
-                          {formatDistance(commuteDistance)}
-                        </p>
-                      )}
-                      {commuteTimes && (
-                        <p className="place-distance">
-                          <Image
-                            src="/car.svg"
-                            alt="Car"
-                            width={20}
-                            height={20}
-                          />{" "}
-                          {commuteTimes.car} min{" "}
-                          <Image
-                            src="/bike.svg"
-                            alt="Bike"
-                            width={20}
-                            height={20}
-                          />{" "}
-                          {commuteTimes.bike} min{" "}
-                          <Image
-                            src="/walking.svg"
-                            alt="Walking"
-                            width={20}
-                            height={20}
-                          />{" "}
-                          {commuteTimes.walk} min
-                        </p>
-                      )}
-                      {home && commute && (
-                        <a
-                          className="route-link"
-                          href={`https://www.google.com/maps/dir/?api=1&origin=${home.coordinates.latitude},${home.coordinates.longitude}&destination=${commute.coordinates.latitude},${commute.coordinates.longitude}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Open in Google Maps
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <CommuteCategory
+                  address={commuteAddress.address}
+                  commuteDistance={commuteDistance}
+                  commuteTimes={commuteTimes}
+                  active={activeCommute}
+                  selected={selectedCommute}
+                  transitDirectionsUrl={transitDirectionsUrl}
+                  color={criteriaColors[0]}
+                  categoryRef={commuteCategoryRef}
+                  onSelect={toggleSelectedCommute}
+                  onHover={hoverCommute}
+                />
               )}
             {favoritesOnly ? (
-              <div>
-                <h3>Favourites</h3>
+              <section className="result-category">
+                <div className="category-header">
+                  <h3>Favourites</h3>
+                </div>
                 {favorites.length === 0 ? (
                   <p>No favourites saved.</p>
                 ) : (
                   <div className="place-cards">
-                    {favorites.map(renderPlaceCard)}
+                    {favorites.map((place) => (
+                      <PlaceCard
+                        key={place.id}
+                        place={place}
+                        isFavorite={true}
+                        isSelected={activePlaceId === place.id}
+                        isExplicitlySelected={selectedPlaceId === place.id}
+                        onSelect={toggleSelectedPlace}
+                        onHover={hoverPlace}
+                        onToggleFavorite={toggleFavorite}
+                        onCardRef={(placeId, card) => {
+                          if (card) placeCardRefs.current.set(placeId, card);
+                          else placeCardRefs.current.delete(placeId);
+                        }}
+                      />
+                    ))}
                   </div>
                 )}
-              </div>
+              </section>
             ) : (
               visibleResults.map(({ criteria, places: foundPlaces }) => (
-                <div key={criteria}>
-                  <h3>
-                    {criteria}
+                <section className="result-category" key={criteria}>
+                  <div className="category-header">
+                    <h3>{criteria}</h3>
                     <span
                       className="dot"
                       style={{
@@ -313,15 +272,32 @@ export default function ResultsPage() {
                           ],
                       }}
                     />
-                  </h3>
+                  </div>
                   {foundPlaces.length === 0 ? (
                     <p>No results found.</p>
                   ) : (
                     <div className="place-cards">
-                      {foundPlaces.map(renderPlaceCard)}
+                      {foundPlaces.map((place) => (
+                        <PlaceCard
+                          key={place.id}
+                          place={place}
+                          isFavorite={favorites.some(
+                            ({ id }) => id === place.id,
+                          )}
+                          isSelected={activePlaceId === place.id}
+                          isExplicitlySelected={selectedPlaceId === place.id}
+                          onSelect={toggleSelectedPlace}
+                          onHover={hoverPlace}
+                          onToggleFavorite={toggleFavorite}
+                          onCardRef={(placeId, card) => {
+                            if (card) placeCardRefs.current.set(placeId, card);
+                            else placeCardRefs.current.delete(placeId);
+                          }}
+                        />
+                      ))}
                     </div>
                   )}
-                </div>
+                </section>
               ))
             )}
           </>
@@ -334,11 +310,17 @@ export default function ResultsPage() {
         {home && (
           <ResultsMap
             home={home}
-            commute={
-              favoritesOnly || hidden.has("Commute address") ? null : commute
-            }
+            commute={visibleCommute}
+            commuteDistance={visibleCommute ? commuteDistance : null}
             places={places}
             layout={listExpanded}
+            activePlaceId={activePlaceId}
+            activeCommute={activeCommute}
+            onPlaceSelect={toggleSelectedPlace}
+            onPlaceHover={hoverPlace}
+            onCommuteSelect={() => toggleSelectedCommute()}
+            onCommuteHover={hoverCommute}
+            onClearSelection={clearSelectedPlace}
           />
         )}
         {/* The filter menu component */}
@@ -360,7 +342,12 @@ export default function ResultsPage() {
         <button
           type="button"
           className="icon-button layout-toggle"
-          onClick={() => setListExpanded((prev) => !prev)}
+          onClick={() =>
+            setSearchData((previous) => ({
+              ...previous,
+              resultsListExpanded: !previous.resultsListExpanded,
+            }))
+          }
         >
           <Image
             src={

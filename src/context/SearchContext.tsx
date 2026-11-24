@@ -15,7 +15,7 @@ import type {
   Place,
 } from "@/types";
 
-type SearchData = {
+export type SearchData = {
   homeInput: string;
   commuteInput: string;
   criteriaInput: string;
@@ -29,6 +29,8 @@ type SearchData = {
   favorites: Place[];
   commuteTimes: CommuteTimes | null;
   resultsRelevant: boolean;
+  hiddenResultFilters: string[];
+  resultsListExpanded: boolean;
 };
 
 type SearchContextType = {
@@ -53,6 +55,8 @@ const defaultSearchData: SearchData = {
   favorites: [],
   commuteTimes: null,
   resultsRelevant: false,
+  hiddenResultFilters: ["Favourites"],
+  resultsListExpanded: false,
 };
 
 const SearchContext = createContext<SearchContextType | undefined>(undefined);
@@ -72,6 +76,10 @@ export function SearchProvider({ children }: { children: ReactNode }) {
           ...defaultSearchData,
           ...parsedSearch,
           favorites: parsedSearch.favorites ?? [],
+          hiddenResultFilters: parsedSearch.hiddenResultFilters ?? [
+            "Favourites",
+          ],
+          resultsListExpanded: parsedSearch.resultsListExpanded ?? false,
         });
       } catch (error) {
         console.error("Failed to load saved search: ", error);

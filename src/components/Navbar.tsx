@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSearch } from "@/context/SearchContext";
 import { useRef } from "react";
 
+// Display navigation controls and import or export the current search
 export default function Navbar() {
   const pathname = usePathname();
   const { searchData, setSearchData, loading, setImportVersion } = useSearch();
@@ -16,9 +17,17 @@ export default function Navbar() {
 
   // Create and download a JSON file with the relevant search data. As the results may change, they are not included
   function handleExport() {
-    const { results, resultsRelevant, ...searchToExport } = searchData;
-
-    const json = JSON.stringify(searchToExport, null, 2);
+    const json = JSON.stringify(
+      searchData,
+      (key, value) =>
+        key === "results" ||
+        key === "resultsRelevant" ||
+        key === "favorites" ||
+        key === "commuteTimes"
+          ? undefined
+          : value,
+      2,
+    );
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
 
@@ -30,7 +39,7 @@ export default function Navbar() {
     URL.revokeObjectURL(url);
   }
 
-  // Import a file andcheck that it is JSON
+  // Import a file and check that it is JSON
   async function handleImport(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
 

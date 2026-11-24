@@ -25,17 +25,17 @@ export const suggestedSearches = [
 
 // Alternative search terms for each criterion (max 2 because searches are slow)
 export const searchAliases: Record<string, string[]> = {
-  school: ["school"],
-  restaurant: ["restaurant"],
-  "grocery store": ["supermarket"],
-  park: ["park"],
-  museum: ["museum"],
-  "bus stop": ["bus stop"],
-  gym: ["fitness centre"],
-  bar: ["bar"],
-  hotel: ["hotel"],
-  café: ["cafe"],
-  pharmacy: ["pharmacy"],
+  school: ["school", "university"],
+  restaurant: ["restaurant", "fast food"],
+  "grocery store": ["supermarket", "convenience store"],
+  park: ["park", "playground"],
+  museum: ["museum", "art gallery"],
+  "bus stop": ["bus stop", "tram stop"],
+  gym: ["fitness centre", "sports centre"],
+  bar: ["bar", "pub"],
+  hotel: ["hotel", "hostel"],
+  café: ["cafe", "coffee shop"],
+  pharmacy: ["pharmacy", "chemist"],
 };
 
 // Different radiuses for Nominatim before max range

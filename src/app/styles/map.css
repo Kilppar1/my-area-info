@@ -4,9 +4,26 @@
   min-width: 0;
   background: #e5e5e5; /* grey background when map is not drawn */
 }
+
 .leaflet-container {
   min-height: 0;
   height: 100%;
+}
+
+.leaflet-tooltip.distance-line-tooltip {
+  padding: 2px 6px;
+  border: 1px solid var(--color-green);
+  border-radius: 999px;
+  background: var(--color-background);
+  box-shadow: 0 1px 4px #00000033;
+  color: var(--color-green);
+  font-family: var(--font-title);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.leaflet-tooltip.distance-line-tooltip::before {
+  display: none;
 }
 
 /* Layout toggle */
@@ -48,6 +65,10 @@
   color: #000;
   font-size: 1rem;
   cursor: pointer;
+}
+
+.filter-section-spacer {
+  height: 12px;
 }
 
 .criteria-filtered-off {

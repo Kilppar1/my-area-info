@@ -1,4 +1,4 @@
-/* Search form styling*/
+/* Search form layout */
 form {
   display: flex;
   flex-direction: column;
@@ -16,6 +16,7 @@ form {
   opacity: 0.4;
 }
 
+/* Form actions */
 .form-buttons {
   display: flex;
   justify-content: space-between;
@@ -59,6 +60,7 @@ form {
   gap: clamp(8px, 3vw, 20px);
 }
 
+/* Address inputs and verification */
 .form-field-input input {
   flex: 1;
   min-width: 0;
@@ -122,6 +124,7 @@ input:focus {
   cursor: pointer;
 }
 
+/* Suggested criteria */
 .form-legend-counter {
   font-family: var(--font-body);
   color: var(--color-green);
@@ -170,6 +173,7 @@ input:focus {
   cursor: pointer;
 }
 
+/* Selected criteria */
 .form-criteria-list {
   display: flex;
   align-items: center;
@@ -224,6 +228,7 @@ input:focus {
   border-radius: 4px;
 }
 
+/* Search range input */
 .searchrange-field {
   display: flex;
   column-gap: 15px;

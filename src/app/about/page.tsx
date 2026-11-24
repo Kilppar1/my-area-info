@@ -1,3 +1,4 @@
+// Additional information about the service
 export default function AboutPage() {
   return (
     <main>

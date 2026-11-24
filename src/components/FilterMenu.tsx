@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 
+// An item shown in the filter menu
 type FilterItem = {
   name: string;
   color?: string;
@@ -58,6 +59,9 @@ export default function FilterMenu({
                 )}
                 {name}
               </button>
+              {isFavorites && (
+                <div className="filter-section-spacer" aria-hidden="true" />
+              )}
             </li>
           ))}
         </ul>

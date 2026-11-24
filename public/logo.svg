@@ -1,8 +1,8 @@
 <svg width="260" height="200" viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M110.5 23L158.383 154.557" stroke="#FF8A3D" stroke-width="2" stroke-linecap="round"/>
-<path d="M53 179.929L110.117 23" stroke="#FF8A3D" stroke-width="2" stroke-linecap="round"/>
-<path d="M158.53 154.557L206.413 23" stroke="#FF8A3D" stroke-width="2" stroke-linecap="round"/>
-<path d="M179 99H234" stroke="#FF8A3D" stroke-width="2" stroke-linecap="round"/>
-<path d="M53 180C46 200 8.5 194 8 174" stroke="#FF8A3D" stroke-width="2" stroke-linecap="round"/>
-<path d="M206.5 23L254.383 154.557" stroke="#FF8A3D" stroke-width="2" stroke-linecap="round"/>
+<path d="M110.5 23L158.383 154.557" stroke-width="6" stroke-linecap="round" stroke="#FF8A3D"/>
+<path d="M53 179.929L110.117 23" stroke-width="6" stroke-linecap="round" stroke="#FF8A3D"/>
+<path d="M158.53 154.557L206.413 23" stroke-width="6" stroke-linecap="round" stroke="#FF8A3D"/>
+<path d="M179 99H234" stroke-width="6" stroke-linecap="round" stroke="#FF8A3D"/>
+<path d="M53 180C46 200 8.5 194 8 174" stroke-width="6" stroke-linecap="round" stroke="#FF8A3D"/>
+<path d="M206.5 23L254.383 154.557" stroke-width="6" stroke-linecap="round" stroke="#FF8A3D"/>
 </svg>
