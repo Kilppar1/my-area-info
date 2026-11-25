@@ -46,6 +46,10 @@
   box-shadow: 0 0 0 1px var(--color-green-40);
 }
 
+.results-sheet-handle {
+  display: none; /* Do not show the handle on desktop */
+}
+
 /* Category headings and metadata */
 .category-header {
   display: flex;
