@@ -11,6 +11,7 @@ export type Address = {
 
 export type Place = {
   id: string;
+  osmKey?: string;
   name: string;
   coordinates: Coordinates;
   color: string;
