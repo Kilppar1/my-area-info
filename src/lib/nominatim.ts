@@ -139,6 +139,7 @@ async function nominatimSearchCriteria(
       // Setting an existing ID again replaces the earlier entry (no duplicates)
       allPlaces.set(id, {
         id,
+        osmKey: `${item.osm_type}/${item.osm_id}`,
         name,
         coordinates: position,
         color,

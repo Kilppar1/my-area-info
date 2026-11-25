@@ -14,6 +14,7 @@ import Image from "next/image";
 import FilterMenu from "@/components/FilterMenu";
 import { criteriaColors } from "@/lib/constants";
 import { useSearchResults } from "@/hooks/useSearchResults";
+import { useRatings } from "@/hooks/useRatings";
 import PlaceCard from "@/components/results/PlaceCard";
 import CommuteCategory from "@/components/results/CommuteCategory";
 
@@ -93,6 +94,7 @@ export default function ResultsPage() {
   const places = favoritesOnly
     ? favorites
     : visibleResults.flatMap((result) => result.places);
+  const { ratings, submitRating } = useRatings(places);
 
   // Create the home marker if the address has valid coordinates
   const home: Pick<Place, "coordinates" | "name"> | null =
@@ -241,6 +243,8 @@ export default function ResultsPage() {
                       <PlaceCard
                         key={place.id}
                         place={place}
+                        rating={place.osmKey ? ratings[place.osmKey] : undefined}
+                        onRate={submitRating}
                         isFavorite={true}
                         isSelected={activePlaceId === place.id}
                         isExplicitlySelected={selectedPlaceId === place.id}
@@ -281,6 +285,13 @@ export default function ResultsPage() {
                         <PlaceCard
                           key={place.id}
                           place={place}
+                          rating={place.osmKey ? ratings[place.osmKey] : undefined}
+                          showRating={
+                            criteriaList.find(
+                              (item) => item.criteria === criteria,
+                            )?.ratingsEnabled ?? true
+                          }
+                          onRate={submitRating}
                           isFavorite={favorites.some(
                             ({ id }) => id === place.id,
                           )}

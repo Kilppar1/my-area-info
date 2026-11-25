@@ -1,0 +1,54 @@
+{
+  "homeInput": "Otakaari",
+  "commuteInput": "Maarintie",
+  "criteriaInput": "",
+  "homeAddresses": [
+    {
+      "id": "166689103",
+      "address": "Otakaari, 02150 Espoo",
+      "coordinates": {
+        "latitude": 60.1898937,
+        "longitude": 24.8300762
+      }
+    }
+  ],
+  "commuteAddresses": [
+    {
+      "id": "167516549",
+      "address": "Maarintie, 02110 Espoo",
+      "coordinates": {
+        "latitude": 60.1862271,
+        "longitude": 24.8115031
+      }
+    }
+  ],
+  "verifiedHomeId": "166689103",
+  "verifiedCommuteId": "167516549",
+  "criteriaList": [
+    {
+      "criteria": "School",
+      "ratingsEnabled": true
+    },
+    {
+      "criteria": "Restaurant",
+      "ratingsEnabled": true
+    },
+    {
+      "criteria": "Grocery store",
+      "ratingsEnabled": false
+    },
+    {
+      "criteria": "Park",
+      "ratingsEnabled": true
+    },
+    {
+      "criteria": "Museum",
+      "ratingsEnabled": true
+    }
+  ],
+  "searchRange": 5,
+  "hiddenResultFilters": [
+    "Favourites"
+  ],
+  "resultsListExpanded": false
+}
