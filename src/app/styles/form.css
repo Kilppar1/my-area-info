@@ -222,10 +222,16 @@ input:focus {
   cursor: pointer;
 }
 
-.criteria-trash:hover,
 .criteria-trash:focus-visible {
   background-color: var(--color-orange-light);
   border-radius: 4px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .criteria-trash:hover {
+    background-color: var(--color-orange-light);
+    border-radius: 4px;
+  }
 }
 
 /* Search range input */
