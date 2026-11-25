@@ -49,6 +49,7 @@ export default function ResultsPage() {
   const [selectedCommute, setSelectedCommute] = useState(false);
   const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
   const [hoveredCommute, setHoveredCommute] = useState(false);
+  const [mobileSheetExpanded, setMobileSheetExpanded] = useState(false);
   const placeCardRefs = useRef(new Map<string, HTMLDivElement>());
   const commuteCategoryRef = useRef<HTMLElement | null>(null);
   const activePlaceId =
@@ -207,8 +208,24 @@ export default function ResultsPage() {
   }
 
   return (
-    <main className={`results-page ${listExpanded ? "list-expanded" : ""}`}>
+    <main
+      className={`results-page ${listExpanded ? "list-expanded" : ""} ${
+        mobileSheetExpanded ? "mobile-sheet-expanded" : ""
+      }`}
+    >
       <div className="results-list" onClick={handleResultsListClick}>
+        {/* Drag button for mobile layout */}
+        <button
+          type="button"
+          className="results-sheet-handle"
+          aria-label={
+            mobileSheetExpanded
+              ? "Collapse results sheet"
+              : "Expand results sheet"
+          }
+          aria-expanded={mobileSheetExpanded}
+          onClick={() => setMobileSheetExpanded((expanded) => !expanded)}
+        />
         {/* A message is shown if someone opens the results page directly without actually doing a search */}
         {!home ? (
           <p>No search found. Create one from the search page.</p>
@@ -243,7 +260,9 @@ export default function ResultsPage() {
                       <PlaceCard
                         key={place.id}
                         place={place}
-                        rating={place.osmKey ? ratings[place.osmKey] : undefined}
+                        rating={
+                          place.osmKey ? ratings[place.osmKey] : undefined
+                        }
                         onRate={submitRating}
                         isFavorite={true}
                         isSelected={activePlaceId === place.id}
@@ -285,7 +304,9 @@ export default function ResultsPage() {
                         <PlaceCard
                           key={place.id}
                           place={place}
-                          rating={place.osmKey ? ratings[place.osmKey] : undefined}
+                          rating={
+                            place.osmKey ? ratings[place.osmKey] : undefined
+                          }
                           showRating={
                             criteriaList.find(
                               (item) => item.criteria === criteria,

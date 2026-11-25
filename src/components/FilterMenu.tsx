@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 // An item shown in the filter menu
@@ -22,9 +22,37 @@ export default function FilterMenu({
 }) {
   // The state for open and closed filter menu
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // The filter menu is closed if clicking elsewhere
+  useEffect(() => {
+    if (!open) return;
+
+    function handleOutsideClick(event: MouseEvent | TouchEvent) {
+      const target = event.target;
+      if (
+        target instanceof Node &&
+        menuRef.current &&
+        !menuRef.current.contains(target)
+      ) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick, true);
+    document.addEventListener("touchstart", handleOutsideClick, true);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick, true);
+      document.removeEventListener("touchstart", handleOutsideClick, true);
+    };
+  }, [open]);
 
   return (
-    <div className={`filter-menu ${open ? "filter-menu-open" : ""}`}>
+    <div
+      ref={menuRef}
+      className={`filter-menu ${open ? "filter-menu-open" : ""}`}
+    >
       <button
         type="button"
         className="icon-button"
