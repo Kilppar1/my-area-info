@@ -1,5 +1,10 @@
 /* Navigation bar styles */
 .navbar {
+  position: sticky;
+  top: 0;
+  z-index: 2000;
+  background: var(--color-background);
+  transition: transform 0.25s ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -8,10 +13,28 @@
   border-bottom: 1px solid var(--color-green-light);
 }
 
+/* Slides the navbar out of view while scrolling down */
+.navbar-hidden {
+  transform: translateY(-100%);
+}
+
 .navbar-section {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Buttons share equal widths, side by side */
+.navbar-section:last-child {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+}
+
+.navbar-section:last-child .btn {
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: center;
 }
 
 .navbar-brand {
@@ -37,18 +60,22 @@
 /* Adjusting layout for mobile */
 @media (max-width: 600px) {
   .navbar {
-    flex-direction: column;
     gap: 8px;
     padding: 8px 12px;
   }
 
   .navbar-section {
-    width: 100%;
-    justify-content: center;
     gap: 8px;
   }
 
+  /* Logo and title take the left side */
+  .navbar-section:first-child {
+    flex: 1;
+    min-width: 0;
+  }
+
   .navbar-section:first-child img {
+    flex: 0 0 auto;
     width: 40px;
     height: 40px;
   }
@@ -62,7 +89,9 @@
     overflow-wrap: anywhere;
   }
 
+  /* Address starts on its own line under "Results near" */
   .navbar-address {
+    display: block;
     overflow-wrap: anywhere;
   }
 
@@ -70,8 +99,13 @@
     font-size: 12px;
   }
 
+  /* Buttons go on the right, stacked above each other */
+  .navbar-section:last-child {
+    flex: 0 0 auto;
+    grid-auto-flow: row;
+  }
+
   .navbar-section:last-child .btn {
-    flex: 0 1 auto;
     min-width: 0;
     height: auto;
     min-height: 36px;
@@ -80,7 +114,6 @@
     line-height: 1.15;
     text-align: center;
   }
-
   .navbar-section:last-child .btn img {
     flex: 0 0 auto;
     width: 20px;

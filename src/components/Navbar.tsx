@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSearch } from "@/context/SearchContext";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Display navigation controls and import or export the current search
 export default function Navbar() {
@@ -14,6 +14,33 @@ export default function Navbar() {
     ({ id }) => id === searchData.verifiedHomeId,
   )?.address;
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [hidden, setHidden] = useState(false);
+
+  // Hide the navbar when scrolling down and show it again when scrolling up
+  useEffect(() => {
+    setHidden(false);
+    let lastY = window.scrollY;
+
+    function handleScroll() {
+      const y = window.scrollY;
+
+      // Always show near the top of the page
+      if (y < 80) {
+        setHidden(false);
+        lastY = y;
+        return;
+      }
+
+      // Ignore tiny movements
+      if (Math.abs(y - lastY) < 8) return;
+
+      setHidden(y > lastY);
+      lastY = y;
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [pathname]);
 
   // Create and download a JSON file with the relevant search data. As the results may change, they are not included
   function handleExport() {
@@ -83,29 +110,31 @@ export default function Navbar() {
   };
 
   return (
-    <header className="navbar">
+    <header className={`navbar ${hidden ? "navbar-hidden" : ""}`}>
       {/*The left part of navigation bar including brand information*/}
-      <Link href="/" className="navbar-section">
-        <Image src="/logo.svg" alt="logo" width={48} height={48} />
+      <div className="navbar-section">
+        <Link href="/">
+          <Image src="/logo.svg" alt="logo" width={48} height={48} />
+        </Link>
         <span className="navbar-brand">
           <span className="navbar-brand-title">{titleSubtitle.title}</span>
           <span className="navbar-brand-subtitle">
             {titleSubtitle.subtitle}
           </span>
         </span>
-      </Link>
+      </div>
 
       <div className="navbar-section">
         {/*The navigation bar responds to where the user currently is*/}
         {/*Check if user is on the homepage to show about or back button*/}
         {pathname === "/" ? (
           <Link href="/about" className="btn btn-primary">
-            About the page
+            About
           </Link>
         ) : (
           <Link href="/" className="btn btn-primary">
             <Image src="/undo.svg" alt="undo" width={24} height={24} />
-            Back to search
+            Back
           </Link>
         )}
 
@@ -123,7 +152,7 @@ export default function Navbar() {
               onClick={() => fileInputRef.current?.click()}
               className="btn btn-primary"
             >
-              Import search
+              Load
               <Image src="/import.svg" alt="import" width={24} height={24} />
             </button>
           </>
@@ -132,7 +161,7 @@ export default function Navbar() {
         {/*Check if user is on the homepage to show export button*/}
         {pathname === "/results" && (
           <button onClick={handleExport} className="btn btn-primary">
-            Export search
+            Save
             <Image src="/export.svg" alt="export" width={24} height={24} />
           </button>
         )}

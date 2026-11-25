@@ -46,6 +46,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Landing page specific scroll behviour */
+html:has(.intro-text-section) {
+  height: auto;
+  overflow-x: clip;
+}
+body:has(.intro-text-section) {
+  height: auto;
+  min-height: 100dvh;
+  overflow-x: clip;
+}
+
 /* Shared heading styles */
 h1,
 h2,
@@ -89,7 +100,7 @@ main {
 }
 
 .intro-text-section h1 {
-  font-size: 2rem;
+  font-size: 1.6rem;
   line-height: 1.25;
   font-weight: 600;
 }
