@@ -267,7 +267,7 @@ export default function ResultsMap({
           key={`${routeDestination.latitude},${routeDestination.longitude}`}
           positions={[toLatLng(home.coordinates), toLatLng(routeDestination)]}
           pathOptions={{
-            color: "var(--color-green)",
+            color: "var(--color-orange)",
             weight: 2,
             opacity: 0.8,
             dashArray: "4 6",
@@ -326,7 +326,7 @@ export default function ResultsMap({
             center={toLatLng(place.coordinates)}
             radius={isSelected ? 14 : 10}
             pathOptions={{
-              color: isSelected ? "var(--color-green)" : "#ffffff",
+              color: isSelected ? "var(--color-orange)" : "#ffffff",
               weight: isSelected ? 4 : 2,
               fillColor: place.color,
               fillOpacity: 1,
