@@ -39,7 +39,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1000; /* Place the menu over the map */
+  z-index: 1200; /* Place the menu over the map and results list */
   padding: 12px;
 }
 
@@ -96,18 +96,29 @@
   }
 
   .filter-menu {
+    z-index: 1200;
+    max-height: calc(100% - 8px);
+    display: flex;
+    flex-direction: column;
     padding: 8px;
   }
 
   .filter-menu .icon-button {
+    align-self: flex-start;
     display: grid;
     min-width: 44px;
     min-height: 44px;
     place-items: center;
+    flex-shrink: 0;
+  }
+
+  .filter-list {
+    overflow-y: auto;
+    min-height: 0;
   }
 
   .filter-list button {
-    min-height: 44px;
+    padding: 4px 0;
   }
 
   .leaflet-control-zoom a {
