@@ -47,7 +47,12 @@ body {
 }
 
 /* Shared heading styles */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-title);
   color: #000;
   font-weight: 600;
@@ -76,8 +81,12 @@ main {
   gap: 24px;
 }
 
+/* Adjusting layout for mobile */
 @media (max-width: 600px) {
   main {
-    padding: 48px 24px;
+    width: 100%;
+    margin: 0;
+    padding: 24px 16px;
+    gap: 20px;
   }
 }

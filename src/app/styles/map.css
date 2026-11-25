@@ -87,3 +87,32 @@
     opacity: 0.7;
   }
 }
+
+/* Adjusting layout for mobile */
+@media (max-width: 1023px) {
+  .results-map-wrapper {
+    position: absolute;
+    inset: 0;
+  }
+
+  .filter-menu {
+    padding: 8px;
+  }
+
+  .filter-menu .icon-button {
+    display: grid;
+    min-width: 44px;
+    min-height: 44px;
+    place-items: center;
+  }
+
+  .filter-list button {
+    min-height: 44px;
+  }
+
+  .leaflet-control-zoom a {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+  }
+}

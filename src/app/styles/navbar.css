@@ -33,3 +33,57 @@
   font-size: 14px;
   color: var(--color-green);
 }
+
+/* Adjusting layout for mobile */
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .navbar-section {
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .navbar-section:first-child img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .navbar-brand {
+    min-width: 0;
+  }
+
+  .navbar-brand-title {
+    font-size: 20px;
+    overflow-wrap: anywhere;
+  }
+
+  .navbar-address {
+    overflow-wrap: anywhere;
+  }
+
+  .navbar-brand-subtitle {
+    font-size: 12px;
+  }
+
+  .navbar-section:last-child .btn {
+    flex: 0 1 auto;
+    min-width: 0;
+    height: auto;
+    min-height: 36px;
+    padding: 2px 8px;
+    font-size: 1rem;
+    line-height: 1.15;
+    text-align: center;
+  }
+
+  .navbar-section:last-child .btn img {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+  }
+}

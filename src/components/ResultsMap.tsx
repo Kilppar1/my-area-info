@@ -14,13 +14,17 @@ import {
   useMap,
   useMapEvents,
   ZoomControl,
+  AttributionControl,
 } from "react-leaflet";
 import L, {
   type CircleMarker as LeafletCircleMarker,
   type LatLngTuple,
+  type Map as LeafletMap,
   type Marker as LeafletMarker,
 } from "leaflet";
 import { formatDistance } from "@/lib/geocoding";
+
+const MOBILE_SHEET_HEIGHT_RATIO = 0.42;
 
 // Custom icon for the home address
 const homeIcon = L.icon({
@@ -63,6 +67,13 @@ function ResizeHandler({ trigger }: { trigger: boolean }) {
   return null;
 }
 
+// Adjusting the map for mobile layout
+function getMobileSheetHeight(map: LeafletMap): number {
+  return window.matchMedia("(max-width: 1023px)").matches
+    ? Math.round(map.getSize().y * MOBILE_SHEET_HEIGHT_RATIO)
+    : 0;
+}
+
 // Fit the map bounds around the home and place markers
 function FitBoundsHandler({
   north,
@@ -80,14 +91,34 @@ function FitBoundsHandler({
   const map = useMap();
 
   useEffect(() => {
-    if (north === south && east === west) return;
+    const mobileSheetHeight = getMobileSheetHeight(map);
+
+    if (north === south && east === west) {
+      if (mobileSheetHeight) {
+        const zoom = map.getZoom();
+        const center = map.unproject(
+          map
+            .project([north, east], zoom)
+            .add([0, Math.round(mobileSheetHeight / 2)]),
+          zoom,
+        );
+        map.setView(center, zoom, { animate: false });
+      }
+      return;
+    }
 
     map.fitBounds(
       [
         [south, west],
         [north, east],
       ],
-      { padding: [48, 48], maxZoom: 14 },
+      mobileSheetHeight
+        ? {
+            paddingTopLeft: [48, 48],
+            paddingBottomRight: [48, 48 + mobileSheetHeight],
+            maxZoom: 14,
+          }
+        : { padding: [48, 48], maxZoom: 14 },
     );
   }, [east, map, north, south, trigger, west]);
 
@@ -215,6 +246,7 @@ export default function ResultsMap({
       zoom={14}
       scrollWheelZoom={true}
       zoomControl={false}
+      attributionControl={false}
       placeholder={<MapPlaceholder />}
     >
       <ResizeHandler trigger={layout} />
@@ -253,7 +285,8 @@ export default function ResultsMap({
           )}
         </Polyline>
       )}
-      <ZoomControl position="bottomright" />{" "}
+      <AttributionControl position="topright" />{" "}
+      <ZoomControl position="topright" />
       {/* Move the zoom controls to lower right */}
       {/* Add home icon into the map */}
       <Marker position={toLatLng(home.coordinates)} icon={homeIcon}>
