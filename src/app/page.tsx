@@ -247,15 +247,23 @@ export default function Home() {
       action();
     }
   };
-
+  // Display the introductory heading and description above the search form
   return (
     <main>
-      <p>
-        One paragraph text about the service. Lorem ipsum dolor sit amet,
-        consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore
-        et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-      </p>
+      <div className="intro-text-section">
+        <h1>Explore the neighbourhood. Find your place.</h1>
+
+        <p>
+          Discover what life could look like in a new area. Search for nearby
+          amenities, explore your surroundings and compare neighbourhoods based
+          on what matters most to you.
+        </p>
+
+        <p>
+          Whether buying or renting, make a more informed decision about your
+          next home.
+        </p>
+      </div>
       {loading ? (
         <p>Loading form...</p>
       ) : (

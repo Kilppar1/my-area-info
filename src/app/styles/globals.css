@@ -81,6 +81,25 @@ main {
   gap: 24px;
 }
 
+/* Home page introduction */
+.intro-text-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.intro-text-section h1 {
+  font-size: 2rem;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+.intro-text-section p {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
 /* Adjusting layout for mobile */
 @media (max-width: 600px) {
   main {
