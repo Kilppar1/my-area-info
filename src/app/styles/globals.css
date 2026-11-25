@@ -46,12 +46,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Landing page specific scroll behviour */
-html:has(.intro-text-section) {
+/* Landing and About pages specific scroll behaviour */
+html:has(.intro-text-section, .about-intro-heading) {
   height: auto;
   overflow-x: clip;
 }
-body:has(.intro-text-section) {
+body:has(.intro-text-section, .about-intro-heading) {
   height: auto;
   min-height: 100dvh;
   overflow-x: clip;
