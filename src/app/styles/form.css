@@ -173,6 +173,43 @@ input:focus {
   cursor: pointer;
 }
 
+/* Spell checking */
+.spelling-suggestion {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-orange);
+}
+
+.spelling-suggestion button {
+  padding: 0;
+  border: none;
+  background: transparent;
+
+  color: var(--color-orange);
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+
+  cursor: pointer;
+}
+
+.spelling-suggestion button:hover,
+.spelling-suggestion button:focus-visible {
+  color: var(--text-primary);
+}
+
+.spelling-suggestion button:focus-visible {
+  outline: 1px solid var(--color-orange);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
 /* Selected criteria */
 .form-criteria-list {
   display: flex;
