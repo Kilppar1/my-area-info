@@ -46,6 +46,10 @@ export default function Home() {
     searchData.criteriaInput ?? "",
   );
   const [criteriaError, setCriteriaError] = useState<string | null>(null);
+  const [spellingSuggestions, setSpellingSuggestions] = useState<
+    Record<string, string>
+  >({});
+  const [checkingSpelling, setCheckingSpelling] = useState(false);
   const [searchRange, setSearchRange] = useState(
     searchData.searchRange?.toString() ?? "5",
   ); // Default search range 5 km
@@ -163,8 +167,30 @@ export default function Home() {
     if (addressType === "commute") setVerifiedCommuteId(id);
   };
 
+  // Request spellchecking
+  const checkSpelling = async (word: string): Promise<string | null> => {
+    try {
+      const response = await fetch("/api/spellcheck", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ word }),
+      });
+
+      if (!response.ok) return null;
+
+      const data: { suggestion: string | null } = await response.json();
+
+      return data.suggestion;
+    } catch (error) {
+      console.error("Spellcheck request failed:", error);
+      return null;
+    }
+  };
+
   // Add a search criteria to the list of search criterias selected. Max search criterias is 5 and the same criteria cannot be added twice.
-  const handleAdd = (criteria: string = criteriaInput) => {
+  const handleAdd = async (criteria: string = criteriaInput) => {
     const validation = criteriaInputSchema.safeParse(criteria);
     if (!validation.success) {
       setCriteriaError(validation.error.issues[0].message);
@@ -173,9 +199,10 @@ export default function Home() {
     setCriteriaError(null);
     const criteriaTrimmed = validation.data;
     if (
-      criteriaTrimmed &&
       criteriaList.length < 5 &&
-      !criteriaList.some((criteria) => criteria.criteria === criteriaTrimmed)
+      !criteriaList.some(
+        (item) => item.criteria.toLowerCase() === criteriaTrimmed.toLowerCase(),
+      )
     ) {
       hasSearchChanged.current = true;
       setCriteriaList((prev) => [
@@ -184,6 +211,46 @@ export default function Home() {
       ]);
       if (criteriaInput === criteria) setCriteriaInput("");
     }
+    setCheckingSpelling(true);
+    try {
+      const suggestion = await checkSpelling(criteriaTrimmed);
+
+      if (suggestion) {
+        setSpellingSuggestions((prev) => ({
+          ...prev,
+          [criteriaTrimmed]: suggestion,
+        }));
+      }
+    } finally {
+      setCheckingSpelling(false);
+    }
+  };
+
+  // Handling the correction of a word
+  const correctSpelling = (original: string, corrected: string) => {
+    hasSearchChanged.current = true;
+
+    setCriteriaList((prev) => {
+      const alreadyExists = prev.some(
+        (item) =>
+          item.criteria.toLowerCase() === corrected.toLowerCase() &&
+          item.criteria !== original,
+      );
+
+      if (alreadyExists) {
+        return prev.filter((item) => item.criteria !== original);
+      }
+
+      return prev.map((item) =>
+        item.criteria === original ? { ...item, criteria: corrected } : item,
+      );
+    });
+
+    setSpellingSuggestions((prev) => {
+      const updated = { ...prev };
+      delete updated[original];
+      return updated;
+    });
   };
 
   // Add or remove criteria to/from the selected criterias when predefiend suggestions are clicked
@@ -386,8 +453,9 @@ export default function Home() {
                 type="button"
                 onClick={() => handleAdd()}
                 className="btn btn-secondary"
+                disabled={checkingSpelling}
               >
-                Add
+                {checkingSpelling ? "Checking..." : "Add"}
               </button>
             </div>
             {criteriaError && (
@@ -428,6 +496,25 @@ export default function Home() {
             {criteriaList.map((criteria) => (
               <div className="form-criteria-list" key={criteria.criteria}>
                 <span>{criteria.criteria}</span>
+
+                {spellingSuggestions[criteria.criteria] && (
+                  <span className="spelling-suggestion">
+                    Did you mean{" "}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        correctSpelling(
+                          criteria.criteria,
+                          spellingSuggestions[criteria.criteria],
+                        )
+                      }
+                    >
+                      {spellingSuggestions[criteria.criteria]}
+                    </button>
+                    ?
+                  </span>
+                )}
+
                 <div className="criteria-properties">
                   <button
                     type="button"
