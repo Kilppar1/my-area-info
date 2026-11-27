@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useSearch } from "@/context/SearchContext";
 import { useEffect, useRef, useState } from "react";
+import { searchDataSchema } from "@/schemas/searchSchema";
 
 // Display navigation controls and import or export the current search
 export default function Navbar() {
@@ -75,21 +76,42 @@ export default function Navbar() {
     try {
       const text = await file.text();
       const importedSearch = JSON.parse(text);
+      const validation = searchDataSchema.safeParse(importedSearch);
 
-      setSearchData({
-        ...searchData,
-        ...importedSearch,
-        favorites: importedSearch.favorites ?? [],
+      if (!validation.success) {
+        alert(
+          "Invalid search file. The file data does not match the expected format.",
+        );
+        return;
+      }
+      const importedData = validation.data;
+      const verifiedHomeId = importedData.homeAddresses.some(
+        (address) => address.id === importedData.verifiedHomeId,
+      )
+        ? importedData.verifiedHomeId
+        : null;
+      const verifiedCommuteId = importedData.commuteAddresses.some(
+        (address) => address.id === importedData.verifiedCommuteId,
+      )
+        ? importedData.verifiedCommuteId
+        : null;
+      setSearchData((previous) => ({
+        ...previous,
+        ...validation.data,
+        verifiedHomeId,
+        verifiedCommuteId,
+        commuteTimes: null,
+        favorites: [],
         results: [],
         resultsRelevant: false,
-      });
+      }));
       setImportVersion((prev) => prev + 1);
     } catch (error) {
       console.error("Failed to import search:", error);
       alert("Invalid JSON file.");
+    } finally {
+      event.target.value = "";
     }
-
-    event.target.value = "";
   }
 
   const titleSubtitle = {
