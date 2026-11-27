@@ -1,18 +1,16 @@
-PROJEKTIN ALUSTAMINEN OMALLE KONEELLE:
+# My Area Info
 
-1. Asenna homebrew
-2. brew install node
-3. Aseta git committien käyttämä nimi ja s-posti:
-   git config --global user.name "Your Name"
-   git config --global user.email "name@domain.example"
-4. Yhdistä koneen SSH-avain GitHubiin (jos ei vielä ole).
-5. git clone git@github.com:Kilppar1/my-area-info.git
-6. VSCode terminal: npm install
-7. npm run dev: http://localhost:3000
-8. Vercel: https://my-area-info.vercel.app
-9. Ensimmäisellä kerralla kun tekee git pull saattaa joutua asettamaan: git config pull.rebase false
+## How to run locally?
 
-Käytetyt VSCode extensionit:
+1. Check that node is installed
+2. git clone git@github.com:Kilppar1/my-area-info.git
+3. npm install
+4. npm run dev: http://localhost:3000
+5. Main branch hosted on Vercel at: https://my-area-info.vercel.app
+
+(Note that the database connection to the review system doesn't work locally.)
+
+## Used VSCode extensions:
 
 1. Prettier -code formatter
 2. ESLint
