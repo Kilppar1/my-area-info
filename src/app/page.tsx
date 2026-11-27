@@ -8,6 +8,11 @@ import type { SubmitEvent } from "react";
 import type { Address, Criteria } from "@/types";
 import { nominatimSearchAddresses } from "@/lib/geocoding";
 import { suggestedSearches } from "@/lib/constants";
+import {
+  addressInputSchema,
+  criteriaInputSchema,
+  searchRangeSchema,
+} from "@/schemas/searchSchema";
 
 // Render and manage the search form
 export default function Home() {
@@ -17,6 +22,7 @@ export default function Home() {
   const [formInitialized, setFormInitialized] = useState(false);
   const hasInitializedSave = useRef(false);
   const hasSearchChanged = useRef(false);
+  const previousImportVersion = useRef(importVersion);
   const [homeInput, setHomeInput] = useState(searchData.homeInput ?? "");
   const [commuteInput, setCommuteInput] = useState(
     searchData.commuteInput ?? "",
@@ -39,17 +45,22 @@ export default function Home() {
   const [criteriaInput, setCriteriaInput] = useState(
     searchData.criteriaInput ?? "",
   );
+  const [criteriaError, setCriteriaError] = useState<string | null>(null);
   const [searchRange, setSearchRange] = useState(
     searchData.searchRange?.toString() ?? "5",
   ); // Default search range 5 km
+  const [rangeError, setRangeError] = useState<string | null>(null);
 
   // Restore saved form values after sessionStorage has loaded
   useEffect(() => {
-    console.log("Imported version after", importVersion);
-    console.log("Loading", loading);
-    console.log("formInitialized", formInitialized);
-    if (!loading && (!formInitialized || importVersion > 0)) {
-      console.log("Going through...");
+    if (
+      !loading &&
+      (!formInitialized || importVersion !== previousImportVersion.current)
+    ) {
+      if (importVersion !== previousImportVersion.current) {
+        hasSearchChanged.current = true;
+        previousImportVersion.current = importVersion;
+      }
       setFormInitialized(true);
       setHomeInput(searchData.homeInput ?? "");
       setCommuteInput(searchData.commuteInput ?? "");
@@ -70,8 +81,8 @@ export default function Home() {
       hasInitializedSave.current = true;
       return;
     }
-    setSearchData({
-      ...searchData,
+    setSearchData((previous) => ({
+      ...previous,
       homeInput,
       commuteInput,
       homeAddresses,
@@ -82,7 +93,7 @@ export default function Home() {
       criteriaInput,
       searchRange: searchRange.trim() === "" ? null : Number(searchRange),
       resultsRelevant: false,
-    });
+    }));
   }, [
     formInitialized,
     homeInput,
@@ -104,7 +115,7 @@ export default function Home() {
   } | null>(null);
 
   // When addresses are searched, nullify verified address and set the list of addresses to be listed to the user. If only one is found, set that as verified
-  const getAdresses = async (
+  const getAddresses = async (
     addressGiven: string,
     addressType: "home" | "commute",
   ) => {
@@ -112,11 +123,20 @@ export default function Home() {
     setAddressError(null);
     if (addressType === "home") setVerifiedHomeId(null);
     if (addressType === "commute") setVerifiedCommuteId(null);
-    if (!addressGiven.trim()) return;
+    // Validate address before sending it to geocoding
+    const validation = addressInputSchema.safeParse(addressGiven);
+
+    if (!validation.success) {
+      setAddressError({
+        type: addressType,
+        message: validation.error.issues[0].message,
+      });
+      return;
+    }
 
     let addresses: Address[] = [];
     try {
-      addresses = await nominatimSearchAddresses(addressGiven);
+      addresses = await nominatimSearchAddresses(validation.data);
       if (addresses.length === 0) {
         setAddressError({ type: addressType, message: "No addresses found." });
       }
@@ -145,7 +165,13 @@ export default function Home() {
 
   // Add a search criteria to the list of search criterias selected. Max search criterias is 5 and the same criteria cannot be added twice.
   const handleAdd = (criteria: string = criteriaInput) => {
-    const criteriaTrimmed = criteria.trim();
+    const validation = criteriaInputSchema.safeParse(criteria);
+    if (!validation.success) {
+      setCriteriaError(validation.error.issues[0].message);
+      return;
+    }
+    setCriteriaError(null);
+    const criteriaTrimmed = validation.data;
     if (
       criteriaTrimmed &&
       criteriaList.length < 5 &&
@@ -189,6 +215,7 @@ export default function Home() {
 
   // Force the input to range to be digits. Use "." as the decimal point and automatically change "," to "."during the input. Allow only one digit after decimal point
   const handleRangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRangeError(null);
     let value = e.target.value.replace(/[^0-9.,]/g, "");
     value = value.replace(/,/g, ".");
     const separatorIndex = value.indexOf(".");
@@ -209,6 +236,16 @@ export default function Home() {
   // Prevent default behaviour and move to results page
   function handleSearch(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
+    const validation = searchRangeSchema.safeParse(searchRange);
+    if (!validation.success) {
+      setRangeError(validation.error.issues[0].message);
+      return;
+    }
+
+    setRangeError(null);
+    if (!verifiedHomeId) {
+      return;
+    }
     if (hasSearchChanged.current) {
       setSearchData((previous) => ({
         ...previous,
@@ -283,14 +320,14 @@ export default function Home() {
                 value={homeInput}
                 onChange={(e) => setHomeInput(e.target.value)}
                 onKeyDown={(e) =>
-                  handleEnter(e, () => getAdresses(homeInput, "home"))
+                  handleEnter(e, () => getAddresses(homeInput, "home"))
                 }
                 placeholder="e.g. Maarintie 8, 02150 Espoo..."
               />
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => getAdresses(homeInput, "home")}
+                onClick={() => getAddresses(homeInput, "home")}
               >
                 Verify
               </button>
@@ -338,7 +375,10 @@ export default function Home() {
             <div className="form-field-input">
               <input
                 value={criteriaInput}
-                onChange={(e) => setCriteriaInput(e.target.value)}
+                onChange={(e) => {
+                  setCriteriaInput(e.target.value);
+                  setCriteriaError(null);
+                }}
                 onKeyDown={(e) => handleEnter(e, handleAdd)}
                 placeholder="Type a name of a place or type of a place..."
               />
@@ -350,6 +390,9 @@ export default function Home() {
                 Add
               </button>
             </div>
+            {criteriaError && (
+              <span className="form-address-error">{criteriaError}</span>
+            )}
             <div className="suggested-searches">
               {suggestedSearches.map((search) => (
                 <button
@@ -436,14 +479,14 @@ export default function Home() {
                 value={commuteInput}
                 onChange={(e) => setCommuteInput(e.target.value)}
                 onKeyDown={(e) =>
-                  handleEnter(e, () => getAdresses(commuteInput, "commute"))
+                  handleEnter(e, () => getAddresses(commuteInput, "commute"))
                 }
                 placeholder="e.g. Maarintie 8, 02150 Espoo..."
               />
               <button
                 type="button"
                 className="btn btn-primary"
-                onClick={() => getAdresses(commuteInput, "commute")}
+                onClick={() => getAddresses(commuteInput, "commute")}
               >
                 Verify
               </button>
@@ -492,6 +535,9 @@ export default function Home() {
               ></input>
               <span>km</span>
             </div>
+            {rangeError && (
+              <span className="form-address-error">{rangeError}</span>
+            )}
           </fieldset>
           <div className="form-buttons">
             <button
